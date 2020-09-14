@@ -1,5 +1,7 @@
 # template.dockerized-nextjs-project
 
+[![default](https://github.com/mazgi/template.dockerized-nextjs-project/workflows/default/badge.svg)](https://github.com/mazgi/template.dockerized-nextjs-project/actions?query=workflow%3Adefault)
+
 ## How to run
 
 Create .env file like below.
