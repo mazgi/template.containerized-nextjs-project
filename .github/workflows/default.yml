@@ -1,0 +1,34 @@
+name: default
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+      - uses: actions/cache@v1
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
+      - uses: actions/cache@v1
+        with:
+          path: bff/node_modules
+          key: ${{ runner.os }}-functions-node_modules-${{ hashFiles('functions/package-lock.json') }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: npm install
+      - run: npm --prefix frontend install
+      - run: npm --prefix bff install
+      - run: npm --prefix frontend run test
+      - run: npm --prefix bff run test
