@@ -7,10 +7,10 @@
 Create .env file like below.
 
 ```
-UID=1000 # for Linux
-GID=100 # for Linux
+UID=1000
+GID=100
 BIND_IP_ADDR=192.168.0.1
-PUBLIC_IP_ADDR=192.168.0.1
+PUBLIC_IP_ADDR_OR_FQDN=203.0.113.1
 ```
 
 Start Docker containers.
