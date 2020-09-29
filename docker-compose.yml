@@ -1,64 +1,10 @@
-version: "3.7"
 services:
-  vscode: # for prettier
-    build:
-      context: Dockerfile.d/vscode
-      args:
-        UID: ${UID:-0}
-        GID: ${GID:-0}
-    working_dir: /workspace
-    volumes:
-      - .:/workspace
-    user: "${UID:-0}:${GID:-0}"
-    command:
-      - bash
-      - -c
-      - |
-        jq -s '.[0] * .[1]' bff/.eslintrc.json frontend/.eslintrc.json > .eslintrc.json
-        # mv package.json /tmp/package.orig.json
-        # jq -s '.[0].devDependencies * .[1].devDependencies' bff/package.json frontend/package.json > /tmp/devDeps.json
-        # jq --argfile deps /tmp/devDeps.json '.devDependencies = $deps' /tmp/package.orig.json > package.json
-        npm install
-  mysql:
-    image: mysql:8
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
-    ports:
-      - "${BIND_IP_ADDR:-127.0.0.1}:3306:3306"
-    volumes:
-      - ./mysql.development/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-      - mysql-data:/var/lib/mysql
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-  redis:
-    image: redis:5
-    ports:
-      - "${BIND_IP_ADDR:-127.0.0.1}:6379:6379"
   bff:
     build:
-      context: Dockerfile.d/bff.development
       args:
-        UID: ${UID:-0}
-        GID: ${GID:-0}
-    depends_on:
-      - mysql
-      - redis
-    working_dir: /workspace
-    volumes:
-      - ./bff:/workspace
-      - ./config.development/bff:/data/config/bff:ro
-    ports:
-      - "${BIND_IP_ADDR:-127.0.0.1}:4000:4000"
-    user: "${UID:-0}:${GID:-0}"
-    environment:
-      - BFF_CONFIG_CREADENTIALS_AMAZON_S3_ACCESS_KEY
-      - BFF_CONFIG_CREADENTIALS_AMAZON_S3_SECRET_ACCESS_KEY
-      - BFF_CONFIG_SOURCE_AMAZON_S3_BUCKET
-      - BFF_CONFIG_SOURCE_AMAZON_S3_PATHNAME
-      - BFF_CONFIG_CREADENTIALS_GOOGLE_CLOUD_STORAGE
-      - BFF_CONFIG_SOURCE_GOOGLE_CLOUD_STORAGE_BUCKET
-      - BFF_CONFIG_SOURCE_GOOGLE_CLOUD_STORAGE_PATHNAME
+        GID: ${UID:-0}
+        UID: ${GID:-0}
+      context: Dockerfile.d/bff.development
     command:
       - bash
       - -c
@@ -66,27 +12,81 @@ services:
         npm install
         scripts/wait-for-mysql.sh mysql
         npm run dev
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - BFF_CONFIG_CREADENTIALS_AMAZON_S3_ACCESS_KEY
+      - BFF_CONFIG_CREADENTIALS_AMAZON_S3_SECRET_ACCESS_KEY
+      - BFF_CONFIG_CREADENTIALS_GOOGLE_CLOUD_STORAGE
+      - BFF_CONFIG_SOURCE_AMAZON_S3_BUCKET
+      - BFF_CONFIG_SOURCE_AMAZON_S3_PATHNAME
+      - BFF_CONFIG_SOURCE_GOOGLE_CLOUD_STORAGE_BUCKET
+      - BFF_CONFIG_SOURCE_GOOGLE_CLOUD_STORAGE_PATHNAME
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
+    user: ${UID:-0}:${GID:-0}
+    volumes:
+      - ./bff:/workspace
+      - ./config.development/bff:/data/config/bff:ro
+    working_dir: /workspace
   frontend:
     build:
-      context: Dockerfile.d/frontend.development
       args:
-        UID: ${UID:-0}
-        GID: ${GID:-0}
-    working_dir: /workspace
-    volumes:
-      - ./frontend:/workspace
-    ports:
-      - "${BIND_IP_ADDR:-127.0.0.1}:3000:3000"
-    user: "${UID:-0}:${GID:-0}"
-    environment:
-      - BFF_ENDPOINT_GRAPHQL_HTTP=http://${PUBLIC_IP_ADDR_OR_FQDN}:4000/graphql
-      - BFF_ENDPOINT_GRAPHQL_WEBSOCKET=ws://${PUBLIC_IP_ADDR_OR_FQDN}:4000/graphql
+        GID: ${UID:-0}
+        UID: ${GID:-0}
+      context: Dockerfile.d/frontend.development
     command:
       - bash
       - -c
       - |
         npm install
         npm run dev
+    environment:
+      BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+      BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
+    user: ${UID:-0}:${GID:-0}
+    volumes:
+      - ./frontend:/workspace
+    working_dir: /workspace
+  mysql:
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    image: mysql:8
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:3306:3306
+    volumes:
+      - ./mysql.development/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - mysql-data:/var/lib/mysql
+  redis:
+    image: redis:5
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:6379:6379
+  vscode: # for prettier
+    build:
+      args:
+        GID: ${UID:-0}
+        UID: ${GID:-0}
+      context: Dockerfile.d/vscode
+    command:
+      - bash
+      - -c
+      - |
+        jq -s '.[0] * .[1]' bff/.eslintrc.json frontend/.eslintrc.json > .eslintrc.json
+        # mv package.json /tmp/package.orig.json
+        # jq -s '.[0].devDependencies * .[1].devDependencies' bff/package.json frontend/package.json > /tmp/devDeps.json
+        # jq --argfile deps /tmp/devDeps.json '.devDependencies = ' /tmp/package.orig.json > package.json
+        npm install
+    user: ${UID:-0}:${GID:-0}
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+version: "3.7"
 volumes:
   mysql-data:
     driver: local
