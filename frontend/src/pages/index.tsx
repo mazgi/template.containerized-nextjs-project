@@ -1,7 +1,5 @@
-import { NextPage, NextPageContext } from 'next'
+import { NextPage } from 'next'
 
-const Page: NextPage = () => (
-    <main>here is /</main>
-)
+const Page: NextPage = () => <main>here is /</main>
 
 export default Page

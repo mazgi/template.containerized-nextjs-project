@@ -12,7 +12,7 @@ const start = async (): Promise<void> => {
   app.use(
     cors({
       origin: config.server.origins,
-      credentials: !config.server.origins.includes('*')
+      credentials: !config.server.origins.includes('*'),
     })
   )
   // Parse cookie for authentication

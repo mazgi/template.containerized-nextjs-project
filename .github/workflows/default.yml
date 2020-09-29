@@ -31,4 +31,6 @@ jobs:
       - run: npm --prefix frontend install
       - run: npm --prefix bff install
       - run: npm --prefix frontend run test
+      - run: npm --prefix frontend run lint
       - run: npm --prefix bff run test
+      # - run: npm --prefix bff run lint

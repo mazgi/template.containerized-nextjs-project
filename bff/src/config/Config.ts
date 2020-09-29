@@ -35,7 +35,7 @@ class Config {
     const [configFromURI, configFromS3, configFromGCS] = await Promise.all([
       getConfigFromURI,
       getConfigFromS3,
-      getConfigFromGCS
+      getConfigFromGCS,
     ])
 
     const configMerged = {
@@ -45,7 +45,7 @@ class Config {
       ...defaultConfig,
       ...configFromURI,
       ...configFromS3,
-      ...configFromGCS
+      ...configFromGCS,
     }
 
     console.log(

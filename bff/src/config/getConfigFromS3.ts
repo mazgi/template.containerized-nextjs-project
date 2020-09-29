@@ -17,15 +17,15 @@ async function getConfigFromS3(): Promise<{}> {
     secretAccessKey,
     maxRetries: 1,
     httpOptions: {
-      timeout: 10 * 1000
+      timeout: 10 * 1000,
     },
     params: {
       Bucket,
-      Key
-    }
+      Key,
+    },
   })
   const response = await s3
-    .getObject(error => {
+    .getObject((error) => {
       if (error) {
         console.log(`cannot config from s3: `, error)
         throw error

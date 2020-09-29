@@ -14,10 +14,7 @@ async function getConfigFromGCS(): Promise<{}> {
   const credentials = JSON.parse(rawCredentials)
   const storage = new Storage({ credentials })
   const destination = `${process.cwd()}/tmp/config.gcs.json`
-  await storage
-    .bucket(bucket)
-    .file(`/${pathname}`)
-    .download({ destination })
+  await storage.bucket(bucket).file(`/${pathname}`).download({ destination })
 
   const rawConfig = fs.readFileSync(destination, 'utf8')
   const config = JSON.parse(rawConfig)
