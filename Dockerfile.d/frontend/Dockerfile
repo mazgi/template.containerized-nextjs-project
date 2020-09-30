@@ -1,4 +1,4 @@
-# See: https://github.com/mazgi/template.dockerized-nextjs-project/tree/main/Dockerfile.d
+# See: https://github.com/mazgi/template.dockerized-nextjs-project/blob/main/Dockerfile.d/frontend/Dockerfile
 FROM node:12-alpine as base
 
 # ================================
