@@ -77,10 +77,6 @@ services:
       - bash
       - -c
       - |
-        jq -s '.[0] * .[1]' bff/.eslintrc.json frontend/.eslintrc.json > .eslintrc.json
-        # mv package.json /tmp/package.orig.json
-        # jq -s '.[0].devDependencies * .[1].devDependencies' bff/package.json frontend/package.json > /tmp/devDeps.json
-        # jq --argfile deps /tmp/devDeps.json '.devDependencies = ' /tmp/package.orig.json > package.json
         npm install
     user: ${UID:-0}:${GID:-0}
     volumes:
