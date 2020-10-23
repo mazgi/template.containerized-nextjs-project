@@ -9,7 +9,9 @@ services:
       - bash
       - -c
       - |
+        npm-check-updates --upgrade
         npm install
+        npm audit fix
         scripts/wait-for-mysql.sh mysql
         npm run dev
     depends_on:
@@ -40,7 +42,9 @@ services:
       - bash
       - -c
       - |
+        npm-check-updates --upgrade
         npm install
+        npm audit fix
         npm run dev
     environment:
       BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
@@ -77,7 +81,9 @@ services:
       - bash
       - -c
       - |
+        npm-check-updates --upgrade
         npm install
+        npm audit fix
     user: ${UID:-0}:${GID:-0}
     volumes:
       - .:/workspace
