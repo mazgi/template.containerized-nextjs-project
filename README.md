@@ -7,10 +7,12 @@
 Create .env file like below.
 
 ```
-UID=1000
-GID=100
+rm -f .env
+test $(uname -s) = 'Linux' && echo "UID=$(id -u)\nGID=$(id -g)" >> .env
+cat<<EOE > .env
 BIND_IP_ADDR=192.168.0.1
 PUBLIC_IP_ADDR_OR_FQDN=203.0.113.1
+EOE
 ```
 
 Start Docker containers.
