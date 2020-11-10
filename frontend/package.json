@@ -2,12 +2,12 @@
   "name": "frontend",
   "private": true,
   "scripts": {
+    "build": "next build",
     "dev": "next",
     "lint": "eslint \"src/**\"",
+    "start": "next start",
     "test": "jest --passWithNoTests",
-    "test:coverage": "jest --passWithNoTests --coverage",
-    "build": "next build",
-    "start": "next start"
+    "test:coverage": "jest --passWithNoTests --coverage"
   },
   "dependencies": {
     "isomorphic-unfetch": "^3.1.0",

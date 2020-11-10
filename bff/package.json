@@ -2,15 +2,15 @@
   "name": "bff",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "lint": "eslint \"src/**\"",
-    "test": "jest --passWithNoTests",
-    "test:coverage": "jest --passWithNoTests --coverage",
     "build": "webpack",
     "build:debug": "webpack --mode development",
+    "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "lint": "eslint \"src/**\"",
     "start": "node dist/main.js",
+    "test": "jest --passWithNoTests",
+    "test:coverage": "jest --passWithNoTests --coverage",
     "ts-node": "ts-node",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "ulid": "ulid"
   },
   "dependencies": {
