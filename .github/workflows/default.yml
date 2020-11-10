@@ -8,23 +8,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
+        with:
+          path: bff/node_modules
+          key: ${{ runner.os }}-bff-node_modules-${{ hashFiles('bff/package-lock.json') }}
+      - uses: actions/cache@v2
         with:
           path: frontend/node_modules
           key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
-      - uses: actions/cache@v1
-        with:
-          path: bff/node_modules
-          key: ${{ runner.os }}-functions-node_modules-${{ hashFiles('functions/package-lock.json') }}
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: 12.x
       - run: npm install
