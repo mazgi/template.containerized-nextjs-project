@@ -12,7 +12,7 @@ services:
         npm-check-updates --upgrade
         npm install
         npm audit fix
-        scripts/wait-for-mysql.sh mysql
+        /project/scripts/wait-for-mysql.sh mysql
         npm run dev
     depends_on:
       - mysql
@@ -29,9 +29,10 @@ services:
       - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
     user: ${UID:-0}:${GID:-0}
     volumes:
-      - ./bff:/workspace
-      - ./config.development/bff:/data/config/bff:ro
-    working_dir: /workspace
+      - ./bff:/project/workspace
+      - ./config:/project/config
+      - ./scripts:/project/scripts
+    working_dir: /project/workspace
   frontend:
     build:
       args:
@@ -53,8 +54,8 @@ services:
       - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
     user: ${UID:-0}:${GID:-0}
     volumes:
-      - ./frontend:/workspace
-    working_dir: /workspace
+      - ./frontend:/project/workspace
+    working_dir: /project/workspace
   mysql:
     command:
       - --character-set-server=utf8mb4
