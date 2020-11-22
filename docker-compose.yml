@@ -2,8 +2,8 @@ services:
   bff:
     build:
       args:
-        GID: ${UID:-0}
-        UID: ${GID:-0}
+        GID: ${GID:-0}
+        UID: ${UID:-0}
       context: Dockerfile.d/bff.development
     command:
       - bash
@@ -37,8 +37,8 @@ services:
   frontend:
     build:
       args:
-        GID: ${UID:-0}
-        UID: ${GID:-0}
+        GID: ${GID:-0}
+        UID: ${UID:-0}
       context: Dockerfile.d/frontend.development
     command:
       - bash
@@ -77,8 +77,8 @@ services:
   vscode: # for prettier
     build:
       args:
-        GID: ${UID:-0}
-        UID: ${GID:-0}
+        GID: ${GID:-0}
+        UID: ${UID:-0}
       context: Dockerfile.d/vscode
     command:
       - bash
