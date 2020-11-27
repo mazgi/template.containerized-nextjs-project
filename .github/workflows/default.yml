@@ -32,6 +32,8 @@ jobs:
           echo "GID=$(id -g)" >> .env
       - run: docker-compose build
       - run: docker-compose up --detach
+      - run: scripts/wait-http.sh 127.0.0.1:4000
+      - run: scripts/wait-http.sh 127.0.0.1:3000
       - run: docker-compose run bff npm run test
       - run: docker-compose run frontend npm run test
       # - run: docker-compose run bff npm run lint
