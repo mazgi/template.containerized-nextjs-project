@@ -27,10 +27,13 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - run: npm install
-      - run: npm --prefix frontend install
-      - run: npm --prefix bff install
-      - run: npm --prefix frontend run test
-      - run: npm --prefix frontend run lint
-      - run: npm --prefix bff run test
-      # - run: npm --prefix bff run lint
+      - run: |
+          echo "UID=$(id -u)" >> .env
+          echo "GID=$(id -g)" >> .env
+      - run: docker-compose build
+      - run: docker-compose up --detach
+      - run: docker-compose run bff npm run test
+      - run: docker-compose run frontend npm run test
+      # - run: docker-compose run bff npm run lint
+      - run: docker-compose run frontend npm run lint
+      - run: docker-compose down --volumes
