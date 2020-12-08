@@ -13,7 +13,7 @@ services:
         npm install
         npm audit fix
         sort-package-json
-        /project/scripts/wait-for-mysql.sh mysql
+        /project/scripts/wait-mysql.sh mysql
         npm run dev
     depends_on:
       - mysql
