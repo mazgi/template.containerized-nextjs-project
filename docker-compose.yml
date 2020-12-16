@@ -1,3 +1,28 @@
+x-service-frontend-base: &frontend-base
+  build:
+    args:
+      GID: ${GID:-0}
+      UID: ${UID:-0}
+    context: Dockerfile.d/frontend.development
+  command:
+    - bash
+    - -c
+    - |
+      npm-check-updates --upgrade
+      npm install
+      npm audit fix
+      sort-package-json
+      npm run dev
+  environment:
+    BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+    BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+  ports:
+    - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
+  user: ${UID:-0}:${GID:-0}
+  volumes:
+    - ./frontend:/project/workspace
+  working_dir: /project/workspace
+
 services:
   bff:
     build:
@@ -35,29 +60,13 @@ services:
       - ./scripts:/project/scripts
     working_dir: /project/workspace
   frontend:
-    build:
-      args:
-        GID: ${GID:-0}
-        UID: ${UID:-0}
-      context: Dockerfile.d/frontend.development
-    command:
-      - bash
-      - -c
-      - |
-        npm-check-updates --upgrade
-        npm install
-        npm audit fix
-        sort-package-json
-        npm run dev
-    environment:
-      BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
-      BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+    <<: *frontend-base
+  frontend-tailwind:
+    <<: *frontend-base
     ports:
-      - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
-    user: ${UID:-0}:${GID:-0}
+      - ${BIND_IP_ADDR:-127.0.0.1}:3001:3000
     volumes:
-      - ./frontend:/project/workspace
-    working_dir: /project/workspace
+      - ./frontend-tailwind:/project/workspace
   mysql:
     command:
       - --character-set-server=utf8mb4
