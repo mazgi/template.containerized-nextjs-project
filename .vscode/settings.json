@@ -4,5 +4,6 @@
     "strings": true
   },
   "less.validate": false,
-  "scss.validate": false,
+  "recommendations": ["bradlc.vscode-tailwindcss", "prettier.prettier-vscode"],
+  "scss.validate": false
 }
