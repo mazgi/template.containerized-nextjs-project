@@ -1,0 +1,8 @@
+{
+  "css.validate": false,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "less.validate": false,
+  "scss.validate": false,
+}

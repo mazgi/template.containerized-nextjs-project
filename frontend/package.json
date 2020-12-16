@@ -6,7 +6,7 @@
     "dev": "next",
     "lint": "npm run lint:es; npm run lint:style",
     "lint:es": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint:style": "stylelint \"src/**/*.{css,sass,scss}\"",
+    "lint:style": "stylelint --allow-empty-input \"src/**/*.{css,sass,scss}\"",
     "start": "next start",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --passWithNoTests --coverage"
@@ -37,7 +37,9 @@
     "stylelint": "^13.8.0",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-recommended-scss": "^4.2.0",
+    "stylelint-config-standard": "^20.0.0",
     "stylelint-order": "^4.1.0",
+    "stylelint-prettier": "^1.1.2",
     "stylelint-scss": "^3.18.0",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
