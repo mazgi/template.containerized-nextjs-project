@@ -36,6 +36,8 @@ jobs:
       - run: scripts/wait-http.sh 127.0.0.1:3000
       - run: docker-compose run bff npm run test
       - run: docker-compose run frontend npm run test
+      - run: docker-compose run frontend-tailwind npm run test
       # - run: docker-compose run bff npm run lint
       - run: docker-compose run frontend npm run lint
+      - run: docker-compose run frontend-tailwind npm run lint
       - run: docker-compose down --volumes
