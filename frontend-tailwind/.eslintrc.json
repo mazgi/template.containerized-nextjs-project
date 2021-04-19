@@ -5,8 +5,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:tailwind/recommended",
     "plugin:prettier/recommended",
-    "plugin:react/recommended",
-    "prettier/@typescript-eslint"
+    "plugin:react/recommended"
   ],
   "plugins": ["@typescript-eslint"],
   "env": {
