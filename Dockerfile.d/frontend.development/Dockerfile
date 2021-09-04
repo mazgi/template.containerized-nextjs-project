@@ -1,5 +1,5 @@
-# https://github.com/mazgi/dockerfiles/blob/main/Dockerfile.d/node-webapp.development/with-user.Dockerfile
-FROM ghcr.io/mazgi/node-webapp.development
+# https://github.com/mazgi/dockerfiles/blob/main/Dockerfile.d/debian-node-webapp.development/with-user.Dockerfile
+FROM ghcr.io/mazgi/debian-node-webapp.development
 
 ARG GID=0
 ARG UID=0
