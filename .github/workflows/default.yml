@@ -6,6 +6,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -33,7 +34,9 @@ jobs:
       - run: docker-compose build
       - run: docker-compose up --detach
       - run: scripts/wait-http.sh 127.0.0.1:4000
+        timeout-minutes: 5
       - run: scripts/wait-http.sh 127.0.0.1:3000
+        timeout-minutes: 1
       - run: docker-compose run bff npm run test
       - run: docker-compose run frontend npm run test
       - run: docker-compose run frontend-tailwind npm run test
