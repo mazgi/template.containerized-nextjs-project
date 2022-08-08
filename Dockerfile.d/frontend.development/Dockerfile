@@ -1,5 +1,5 @@
-# https://github.com/mazgi/dockerfiles/blob/main/Dockerfile.d/debian-node-webapp.development/with-user.Dockerfile
-FROM ghcr.io/mazgi/debian-node-webapp.development
+# https://github.com/mazgi/dockerfiles/blob/main/Dockerfile.d/node-webapp.development/with-user.Dockerfile
+FROM ghcr.io/mazgi/node-webapp.development
 
 ARG GID=0
 ARG UID=0
@@ -13,4 +13,5 @@ RUN :\
   && usermod --append --groups developer developer || true\
   # It will be duplicate UID or GID with "node" user when your UID==1000 or GID==100.
   && echo '%users ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/grant-all-without-password-to-users\
-  && echo '%developer ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/grant-all-without-password-to-developer
+  && echo '%developer ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/grant-all-without-password-to-developer\
+  && :

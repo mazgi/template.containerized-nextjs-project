@@ -1,5 +1,5 @@
 # See: https://github.com/mazgi/template.dockerized-nextjs-project/blob/main/Dockerfile.d/frontend/Dockerfile
-FROM node:14-alpine as base
+FROM node:18-alpine as base
 
 # ================================
 # Begin builder stage
