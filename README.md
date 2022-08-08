@@ -1,12 +1,12 @@
 # template.dockerized-nextjs-project
 
-[![default](https://github.com/mazgi/template.dockerized-nextjs-project/workflows/default/badge.svg)](https://github.com/mazgi/template.dockerized-nextjs-project/actions?query=workflow%3Adefault)
+[![default](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/default.yml/badge.svg)](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/default.yml)
 
 ## How to run
 
 Create .env file like below.
 
-```
+```console
 rm -f .env
 test $(uname -s) = 'Linux' && echo -e "UID=$(id -u)\nGID=$(id -g)" >> .env
 cat<<EOE >> .env
@@ -17,6 +17,6 @@ EOE
 
 Start Docker containers.
 
-```shellsession
-docker-compose up
+```console
+docker compose up
 ```
