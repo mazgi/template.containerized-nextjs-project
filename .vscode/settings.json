@@ -1,9 +1,9 @@
+// See https://code.visualstudio.com/docs/getstarted/settings#_workspace-settingsjson-location
 {
   "css.validate": false,
   "editor.quickSuggestions": {
     "strings": true
   },
   "less.validate": false,
-  "recommendations": ["bradlc.vscode-tailwindcss", "prettier.prettier-vscode"],
   "scss.validate": false
 }
