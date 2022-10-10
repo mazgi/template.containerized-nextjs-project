@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/usr/bin/env -S zsh -eu
 
 readonly host="$1"
 
