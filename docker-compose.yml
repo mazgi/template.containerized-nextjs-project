@@ -3,17 +3,18 @@ x-service-bff-base: &bff-base
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
+      HEALTHCHECK_URL: http://localhost:4000/api/status
     context: Dockerfile.d/bff.development
   command:
     - bash
     - -c
     - |
       npm-check-updates --upgrade
-      pnpm install
-      pnpm audit fix
+      npm install
+      npm audit fix
       sort-package-json
       /workspace/scripts/wait-mysql.zsh mysql
-      pnpm run dev
+      npm run dev
   depends_on:
     - mysql
     - redis
@@ -30,22 +31,26 @@ x-service-frontend-base: &frontend-base
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
+      HEALTHCHECK_URL: http://localhost:3000/api/status
     context: Dockerfile.d/frontend.development
   command:
     - bash
     - -c
     - |
       npm-check-updates --upgrade
-      pnpm install
-      pnpm audit fix
+      npm install
+      npm audit fix
       sort-package-json
-      pnpm run dev
+      npm run dev
   environment:
     BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
     BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
   init: true
   ports:
+    # Next.js
     - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
+    # StoryBook
+    - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
   user: ${UID:-0}:${GID:-0}
   volumes:
     - .:/workspace
@@ -97,8 +102,8 @@ services:
       - -c
       - |
         npm-check-updates --upgrade
-        pnpm install
-        pnpm audit fix
+        npm install
+        npm audit fix
         sort-package-json
     init: true
     user: ${UID:-0}:${GID:-0}

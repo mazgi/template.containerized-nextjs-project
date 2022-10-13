@@ -3,8 +3,13 @@ FROM ghcr.io/mazgi/node-webapp.development
 
 ARG GID=0
 ARG UID=0
+ARG HEALTHCHECK_URL="http://localhost/status"
 ENV GID=${GID:-0}
 ENV UID=${UID:-0}
+ENV HEALTHCHECK_URL=${HEALTHCHECK_URL:-"http://localhost/status"}
+
+HEALTHCHECK --interval=2s --timeout=1s --start-period=4s --retries=2\
+ CMD curl --fail --output /dev/null --silent ${HEALTHCHECK_URL}
 
 RUN :\
   # Create a user for development who has the same UID and GID as you.
