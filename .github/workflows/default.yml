@@ -2,45 +2,93 @@ name: default
 
 on:
   push:
+  workflow_dispatch:
 
 jobs:
-  test:
+  start-test-stop:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      # 
+      # Cache settings
+      - uses: actions/cache@v3
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-dotpnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: bff/node_modules
           key: ${{ runner.os }}-bff-node_modules-${{ hashFiles('bff/package-lock.json') }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: frontend/node_modules
           key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-      - run: |
+      # 
+      - name: Export UIDs as environment variables
+        run: |
           echo "UID=$(id -u)" >> .env
           echo "GID=$(id -g)" >> .env
-      - run: docker-compose build
-      - run: docker-compose up --detach
-      - run: scripts/wait-http.sh 127.0.0.1:4000
-        timeout-minutes: 5
-      - run: scripts/wait-http.sh 127.0.0.1:3000
+          echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
+      - name: Pull containers
+        timeout-minutes: 4
+        run: |
+          docker compose pull
+      - name: Build containers
+        timeout-minutes: 4
+        run: |
+          docker compose build
+      - name: Start the service
+        timeout-minutes: 2
+        run: |
+          docker compose up --detach
+      - name: Wait the service - bff
+        timeout-minutes: 4
+        run: |
+          while :
+          do
+            docker compose ps --format=json bff\
+             | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
+             && break
+            sleep 1
+          done
+          docker compose logs bff
+      - name: Wait the service - frontend
+        timeout-minutes: 4
+        run: |
+          while :
+          do
+            docker compose ps --format=json frontend\
+             | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
+             && break
+            sleep 1
+          done
+          docker compose logs frontend
+      - name: Test the service - bff
+        timeout-minutes: 4
+        run: |
+          docker compose exec bff pnpm run test:ci
+      - name: Test the service - frontend
+        timeout-minutes: 4
+        run: |
+          docker compose exec frontend pnpm run test:ci
+      - name: Lint the service - bff
+        timeout-minutes: 4
+        run: |
+          docker compose exec bff pnpm run lint
+      - name: Lint the service - frontend
+        timeout-minutes: 4
+        run: |
+          docker compose exec frontend pnpm run lint
+      - name: Stop the service
         timeout-minutes: 1
-      - run: docker-compose run bff npm run test
-      - run: docker-compose run frontend npm run test
-      - run: docker-compose run frontend-tailwind npm run test
-      # - run: docker-compose run bff npm run lint
-      - run: docker-compose run frontend npm run lint
-      - run: docker-compose run frontend-tailwind npm run lint
-      - run: docker-compose down --volumes
+        run: |
+          docker compose down
