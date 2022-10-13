@@ -5,6 +5,7 @@
     "build": "webpack",
     "build:debug": "webpack --mode development",
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "fmt": "eslint \"src/**\" --fix",
     "lint": "eslint \"src/**\"",
     "start": "node dist/main.js",
     "test": "jest --passWithNoTests",
@@ -17,7 +18,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^6.5.2",
-    "aws-sdk": "^2.1231.0",
+    "aws-sdk": "^2.1232.0",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
