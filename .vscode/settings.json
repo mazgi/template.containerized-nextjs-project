@@ -1,9 +1,4 @@
-// See https://code.visualstudio.com/docs/getstarted/settings#_workspace-settingsjson-location
 {
-  "css.validate": false,
-  "editor.quickSuggestions": {
-    "strings": true
-  },
-  "less.validate": false,
-  "scss.validate": false
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
 }
