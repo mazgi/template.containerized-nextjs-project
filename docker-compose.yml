@@ -3,24 +3,14 @@ x-service-bff-base: &bff-base
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
-      HEALTHCHECK_URL: http://localhost:4000/api/status
+      HEALTHCHECK_URL: http://localhost:4000/rest/status
     context: Dockerfile.d/bff.development
-  command:
-    - bash
-    - -c
-    - |
-      npm-check-updates --upgrade
-      npm install
-      npm audit fix
-      sort-package-json
-      /workspace/scripts/wait-mysql.zsh mysql
-      npm run dev
   depends_on:
     - mysql
     - redis
+  environment:
+    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:3000
   init: true
-  ports:
-    - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
   user: ${UID:-0}:${GID:-0}
   volumes:
     - .:/workspace
@@ -33,24 +23,10 @@ x-service-frontend-base: &frontend-base
       UID: ${UID:-0}
       HEALTHCHECK_URL: http://localhost:3000/api/status
     context: Dockerfile.d/frontend.development
-  command:
-    - bash
-    - -c
-    - |
-      npm-check-updates --upgrade
-      npm install
-      npm audit fix
-      sort-package-json
-      npm run dev
   environment:
     BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
     BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
   init: true
-  ports:
-    # Next.js
-    - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
-    # StoryBook
-    - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
   user: ${UID:-0}:${GID:-0}
   volumes:
     - .:/workspace
@@ -59,14 +35,62 @@ x-service-frontend-base: &frontend-base
 services:
   bff:
     <<: *bff-base
+    command:
+      - zsh
+      - -ic
+      - |
+        npm-check-updates --upgrade
+        npm install
+        npm audit fix
+        sort-package-json
+        /workspace/scripts/wait-mysql.zsh mysql
+        npm run dev
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
+  bff-test-watch:
+    <<: *bff-base
+    command:
+      - zsh
+      - -ic
+      - |
+        npm run test:watch
+    depends_on:
+      - bff
+    profiles:
+      - watch
   frontend:
     <<: *frontend-base
+    command:
+      - zsh
+      - -ic
+      - |
+        npm-check-updates --upgrade
+        npm install
+        npm audit fix
+        sort-package-json
+        npm run dev
+    ports:
+      # Next.js
+      - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
+      # StoryBook
+      - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
+  frontend-test-watch:
+    <<: *frontend-base
+    command:
+      - zsh
+      - -ic
+      - |
+        npm run test:watch
+    depends_on:
+      - frontend
+    profiles:
+      - watch
   mysql:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
     # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MySQL.Concepts.VersionMgmt.html
     # https://learn.microsoft.com/en-us/azure/mysql/concepts-version-policy#supported-mysql-versions
     # https://cloud.google.com/sql/docs/mysql/db-versions
@@ -98,20 +122,21 @@ services:
         UID: ${UID:-0}
       context: Dockerfile.d/vscode
     command:
-      - bash
-      - -c
+      - zsh
+      - -ic
       - |
         npm-check-updates --upgrade
         npm install
         npm audit fix
         sort-package-json
+        sleep infinity
     init: true
     user: ${UID:-0}:${GID:-0}
     volumes:
       - .:/workspace
     working_dir: /workspace
 
-version: "3.9"
+version: '3.9'
 volumes:
   mysql-data:
     driver: local
