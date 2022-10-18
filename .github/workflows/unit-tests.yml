@@ -6,38 +6,46 @@ on:
 
 jobs:
   start-test-stop:
-    runs-on: ubuntu-latest
     timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - bff
+          - frontend
     steps:
       - uses: actions/checkout@v3
       #
       # Cache settings
-      - uses: actions/cache@v3
+      - name: cache the pnpm store
+        uses: actions/cache@v3
         with:
           path: .pnpm-store
           key: ${{ runner.os }}-dotpnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-      - uses: actions/cache@v3
+      - name: cache user deps
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache@v3
+      - name: cache workspace deps
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-      - uses: actions/cache@v3
+      - name: cache service deps - ${{ matrix.service }}
+        uses: actions/cache@v3
         with:
-          path: bff/node_modules
-          key: ${{ runner.os }}-bff-node_modules-${{ hashFiles('bff/package-lock.json') }}
-      - uses: actions/cache@v3
-        with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
+          path: ${{ matrix.service }}/node_modules
+          key: ${{ runner.os }}-${{ matrix.service }}-node_modules-${{ hashFiles('${{ matrix.service }}/package-lock.json') }}
       #
+      # Envirinment settings
       - name: Export UIDs as environment variables
         run: |
           echo "UID=$(id -u)" >> .env
           echo "GID=$(id -g)" >> .env
           echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
+      #
+      # Prepare services
       - name: Pull containers
         timeout-minutes: 4
         run: |
@@ -50,44 +58,29 @@ jobs:
         timeout-minutes: 2
         run: |
           docker compose up --detach
-      - name: Wait the service - bff
+      - name: Wait the service - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
           while :
           do
-            docker compose ps --format=json bff\
+            docker compose ps --format=json ${{ matrix.service }}\
              | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
              && break
             sleep 1
           done
-          docker compose logs bff
-      - name: Wait the service - frontend
+          docker compose logs ${{ matrix.service }}
+      #
+      # Test services
+      - name: Test the service - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
-          while :
-          do
-            docker compose ps --format=json frontend\
-             | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
-             && break
-            sleep 1
-          done
-          docker compose logs frontend
-      - name: Test the service - bff
+          docker compose exec ${{ matrix.service }} npm run test:ci
+      - name: Lint the service - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
-          docker compose exec bff npm run test:ci
-      - name: Test the service - frontend
-        timeout-minutes: 4
-        run: |
-          docker compose exec frontend npm run test:ci
-      - name: Lint the service - bff
-        timeout-minutes: 4
-        run: |
-          docker compose exec bff npm run lint
-      - name: Lint the service - frontend
-        timeout-minutes: 4
-        run: |
-          docker compose exec frontend npm run lint
+          docker compose exec ${{ matrix.service }} npm run lint
+      #
+      # Clean up
       - name: Stop the service
         timeout-minutes: 1
         run: |
