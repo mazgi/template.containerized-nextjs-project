@@ -1,9 +1,4 @@
 {
-  "css.validate": false,
-  "editor.quickSuggestions": {
-    "strings": true
-  },
-  "less.validate": false,
-  "recommendations": ["bradlc.vscode-tailwindcss", "prettier.prettier-vscode"],
-  "scss.validate": false
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
 }

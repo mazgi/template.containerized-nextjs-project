@@ -1,0 +1,88 @@
+name: unit-tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  start-test-stop:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - bff
+          - frontend
+    steps:
+      - uses: actions/checkout@v3
+      #
+      # Cache settings
+      - name: cache the pnpm store
+        uses: actions/cache@v3
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-dotpnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: cache user deps
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
+      - name: cache workspace deps
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+      - name: cache service deps - ${{ matrix.service }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ matrix.service }}/node_modules
+          key: ${{ runner.os }}-${{ matrix.service }}-node_modules-${{ hashFiles('${{ matrix.service }}/package-lock.json') }}
+      #
+      # Envirinment settings
+      - name: Export UIDs as environment variables
+        run: |
+          echo "UID=$(id -u)" >> .env
+          echo "GID=$(id -g)" >> .env
+          echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
+      #
+      # Prepare services
+      - name: Pull containers
+        timeout-minutes: 4
+        run: |
+          docker compose pull
+      - name: Build containers
+        timeout-minutes: 4
+        run: |
+          docker compose build
+      - name: Start the service
+        timeout-minutes: 2
+        run: |
+          docker compose up --detach
+      - name: Wait the service - ${{ matrix.service }}
+        timeout-minutes: 4
+        run: |
+          while :
+          do
+            docker compose ps --format=json ${{ matrix.service }}\
+             | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
+             && break
+            sleep 1
+          done
+          docker compose logs ${{ matrix.service }}
+      #
+      # Test services
+      - name: Test the service - ${{ matrix.service }}
+        timeout-minutes: 4
+        run: |
+          docker compose exec ${{ matrix.service }} npm run test:ci
+      - name: Lint the service - ${{ matrix.service }}
+        timeout-minutes: 4
+        run: |
+          docker compose exec ${{ matrix.service }} npm run lint
+      #
+      # Clean up
+      - name: Stop the service
+        timeout-minutes: 1
+        run: |
+          docker compose down

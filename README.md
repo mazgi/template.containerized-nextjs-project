@@ -1,6 +1,6 @@
 # template.dockerized-nextjs-project
 
-[![default](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/default.yml/badge.svg)](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/default.yml)
+[![unit-tests](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/mazgi/template.dockerized-nextjs-project/actions/workflows/unit-tests.yml)
 
 ## How to run
 
