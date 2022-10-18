@@ -2,7 +2,6 @@
 //  - https://nextjs.org/docs/testing#jest-and-react-testing-library
 //  - https://github.com/vercel/next.js/blob/canary/examples/with-jest/jest.config.js
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
