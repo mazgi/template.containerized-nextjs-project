@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      # 
+      #
       # Cache settings
       - uses: actions/cache@v3
         with:
@@ -32,7 +32,7 @@ jobs:
         with:
           path: frontend/node_modules
           key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
-      # 
+      #
       - name: Export UIDs as environment variables
         run: |
           echo "UID=$(id -u)" >> .env
@@ -75,19 +75,19 @@ jobs:
       - name: Test the service - bff
         timeout-minutes: 4
         run: |
-          docker compose exec bff pnpm run test:ci
+          docker compose exec bff npm run test:ci
       - name: Test the service - frontend
         timeout-minutes: 4
         run: |
-          docker compose exec frontend pnpm run test:ci
+          docker compose exec frontend npm run test:ci
       - name: Lint the service - bff
         timeout-minutes: 4
         run: |
-          docker compose exec bff pnpm run lint
+          docker compose exec bff npm run lint
       - name: Lint the service - frontend
         timeout-minutes: 4
         run: |
-          docker compose exec frontend pnpm run lint
+          docker compose exec frontend npm run lint
       - name: Stop the service
         timeout-minutes: 1
         run: |
