@@ -58,7 +58,7 @@ jobs:
         timeout-minutes: 4
         run: |
           docker compose build ${{ matrix.service }}
-      - name: Start the service
+      - name: Start the service - ${{ matrix.service }}
         timeout-minutes: 2
         run: |
           docker compose up --detach ${{ matrix.service }}
@@ -85,7 +85,7 @@ jobs:
           docker compose exec ${{ matrix.service }} npm run lint
       #
       # Clean up
-      - name: Stop the service
+      - name: Stop services
         timeout-minutes: 1
         run: |
           docker compose down
