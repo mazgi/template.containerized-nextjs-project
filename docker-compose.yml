@@ -1,35 +1,53 @@
+x-service-node-webapp-base: &node-webapp-base
+  build:
+    args:
+      GID: ${GID:-0}
+      UID: ${UID:-0}
+    context: Dockerfile.d/node-webapp.development
+  command:
+    - zsh
+    - --login
+    - -c
+    - |
+      npm-check-updates --upgrade
+      npm install
+      npm audit fix
+      sort-package-json
+      sleep infinity
+  init: true
+  user: ${UID:-0}:${GID:-0}
+  volumes:
+    - home-developer:/home/developer
+    - home-root:/root # for macOS & Windows
+    - .:/workspace
+  working_dir: /workspace
+
 x-service-bff-base: &bff-base
+  <<: *node-webapp-base
   build:
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
       HEALTHCHECK_URL: http://localhost:4000/rest/status
-    context: Dockerfile.d/bff.development
+    context: Dockerfile.d/node-webapp.development
   depends_on:
     - mysql
     - redis
   environment:
     ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:3000
-  init: true
-  user: ${UID:-0}:${GID:-0}
-  volumes:
-    - .:/workspace
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
+  <<: *node-webapp-base
   build:
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
       HEALTHCHECK_URL: http://localhost:3000/api/status
-    context: Dockerfile.d/frontend.development
+    context: Dockerfile.d/node-webapp.development
   environment:
     BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
     BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
-  init: true
-  user: ${UID:-0}:${GID:-0}
-  volumes:
-    - .:/workspace
   working_dir: /workspace/frontend
 
 services:
@@ -45,9 +63,10 @@ services:
         npm audit fix
         sort-package-json
         /workspace/scripts/wait-mysql.zsh mysql
-        npm run dev
+        npm run start:dev
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
+      - ${BIND_IP_ADDR:-127.0.0.1}:49229:9229
   bff-test-watch:
     <<: *bff-base
     command:
@@ -58,8 +77,11 @@ services:
         npm run test:watch
     depends_on:
       - bff
+    healthcheck:
+      disable: true
     profiles:
-      - watch
+      - all
+      - test-watch
   frontend:
     <<: *frontend-base
     command:
@@ -71,12 +93,27 @@ services:
         npm install
         npm audit fix
         sort-package-json
-        npm run dev
+        npm run dev:debug
     ports:
-      # Next.js
       - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
-      # StoryBook
+      - ${BIND_IP_ADDR:-127.0.0.1}:39229:9229
+  frontend-storybook:
+    <<: *frontend-base
+    command:
+      - zsh
+      - --login
+      - -c
+      - |
+        npm run storybook
+    depends_on:
+      - frontend
+    healthcheck:
+      disable: true
+    ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
+    profiles:
+      - all
+      - tools
   frontend-test-watch:
     <<: *frontend-base
     command:
@@ -87,8 +124,13 @@ services:
         npm run test:watch
     depends_on:
       - frontend
+    healthcheck:
+      disable: true
     profiles:
-      - watch
+      - all
+      - test-watch
+
+  # Middlewares
   mysql:
     command:
       - --character-set-server=utf8mb4
@@ -123,28 +165,15 @@ services:
   # ["ERROR" - 00:00:00 AM] Failed to load module. If you have prettier or plugins referenced in package.json, ensure you have run `npm install`
   # ["ERROR" - 00:00:00 AM] Cannot find module 'prettier' from '/path/to/the/project'
   workspace:
-    build:
-      args:
-        GID: ${GID:-0}
-        UID: ${UID:-0}
-      context: Dockerfile.d/workspace
-    command:
-      - zsh
-      - --login
-      - -c
-      - |
-        npm-check-updates --upgrade
-        npm install
-        npm audit fix
-        sort-package-json
-        sleep infinity
-    init: true
-    user: ${UID:-0}:${GID:-0}
-    volumes:
-      - .:/workspace
-    working_dir: /workspace
+    <<: *node-webapp-base
+    healthcheck:
+      disable: true
 
 version: '3.9'
 volumes:
+  home-developer:
+    driver: local
+  home-root:
+    driver: local
   mysql-data:
     driver: local

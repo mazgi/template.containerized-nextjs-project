@@ -80,11 +80,11 @@ docker compose up --detach && docker compose logs --follow
 You are always able to start and stop to show logs for specific the service/container as below.
 
 ```console
-docker compose logs --follow bff
+docker compose logs --follow --no-log-prefix bff
 ```
 
 ```console
-docker compose logs --follow frontend
+docker compose logs --follow --no-log-prefix frontend
 ```
 
 ```console
