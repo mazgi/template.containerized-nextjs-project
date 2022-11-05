@@ -3,7 +3,7 @@ import { NextPage } from 'next'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 
-const StatusPage: NextPage = () => {
+const Page: NextPage = () => {
   const [status, setStatus] = useState<Status>({
     message: 'initial message',
     version: '0.0.0',
@@ -32,4 +32,4 @@ const StatusPage: NextPage = () => {
   )
 }
 
-export default StatusPage
+export default Page
