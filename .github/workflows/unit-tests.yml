@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+env:
+  DOCKER_BUILDKIT: 1
+
 jobs:
   start-test-stop:
     timeout-minutes: 10
@@ -42,23 +45,23 @@ jobs:
       # Envirinment settings
       - name: Export UIDs as environment variables
         run: |
-          echo "UID=$(id -u)" >> .env
-          echo "GID=$(id -g)" >> .env
           echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
+          echo "GID=$(id -g)" >> .env
+          echo "UID=$(id -u)" >> .env
       #
       # Prepare services
-      - name: Pull containers
+      - name: Pull containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
-          docker compose pull
-      - name: Build containers
+          docker compose pull ${{ matrix.service }}
+      - name: Build containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
-          docker compose build
-      - name: Start the service
+          docker compose build ${{ matrix.service }}
+      - name: Start the service - ${{ matrix.service }}
         timeout-minutes: 2
         run: |
-          docker compose up --detach
+          docker compose up --detach ${{ matrix.service }}
       - name: Wait the service - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
@@ -82,7 +85,7 @@ jobs:
           docker compose exec ${{ matrix.service }} npm run lint
       #
       # Clean up
-      - name: Stop the service
+      - name: Stop services
         timeout-minutes: 1
         run: |
           docker compose down
