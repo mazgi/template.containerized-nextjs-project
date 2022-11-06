@@ -6,10 +6,6 @@ LABEL maintainer="docker@mazgi.com"
 ARG NODE_VERSION=18.12.0
 ENV NODE_VERSION=${NODE_VERSION:-18.12.0}
 
-# Todo: pass to bff & frontend
-ARG GIT_SHORT_SHA=
-ENV GIT_SHORT_SHA=${GIT_SHORT_SHA}
-
 # Set in non-interactive mode.
 ENV DEBIAN_FRONTEND=noninteractive
 
