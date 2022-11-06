@@ -1,0 +1,59 @@
+name: build-production-images
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  start-build-test-stop-save:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Pull images
+        timeout-minutes: 4
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           pull
+      - name: Build images
+        timeout-minutes: 4
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           build {bff,frontend}-prod
+      - name: Start services
+        timeout-minutes: 4
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           up --detach {bff,frontend}-prod
+      - name: Wait the service
+        timeout-minutes: 4
+        run: |
+          for service in {bff,frontend}-prod
+          do
+            while :
+            do
+              docker compose ps --format=json ${service}\
+              | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
+              && break
+              sleep 1
+            done
+            docker compose logs ${service}
+          done
+      - name: Stop services
+        timeout-minutes: 1
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           down

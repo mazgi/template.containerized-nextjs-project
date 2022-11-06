@@ -1,4 +1,4 @@
-x-service-node-webapp-base: &node-webapp-base
+x-service-node-webapp-development-base: &node-webapp-development-base
   build:
     args:
       GID: ${GID:-0}
@@ -23,7 +23,7 @@ x-service-node-webapp-base: &node-webapp-base
   working_dir: /workspace
 
 x-service-bff-base: &bff-base
-  <<: *node-webapp-base
+  <<: *node-webapp-development-base
   build:
     args:
       GID: ${GID:-0}
@@ -38,7 +38,7 @@ x-service-bff-base: &bff-base
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
-  <<: *node-webapp-base
+  <<: *node-webapp-development-base
   build:
     args:
       GID: ${GID:-0}
@@ -165,7 +165,7 @@ services:
   # ["ERROR" - 00:00:00 AM] Failed to load module. If you have prettier or plugins referenced in package.json, ensure you have run `npm install`
   # ["ERROR" - 00:00:00 AM] Cannot find module 'prettier' from '/path/to/the/project'
   workspace:
-    <<: *node-webapp-base
+    <<: *node-webapp-development-base
     healthcheck:
       disable: true
 
