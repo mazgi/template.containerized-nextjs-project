@@ -68,7 +68,7 @@ jobs:
           while :
           do
             docker compose ps --format=json ${{ matrix.service }}\
-             | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
+             | jq --exit-status '.[] | select(.Health=="healthy")' 2> /dev/null\
              && break
             sleep 1
           done
