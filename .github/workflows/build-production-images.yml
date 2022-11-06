@@ -22,6 +22,9 @@ jobs:
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
            pull
+      - name: Store the short SHA hash
+        run: |
+          echo GIT_SHORT_SHA=$(echo '${{ toJSON(github) }}' | jq -r '.sha[0:7]') >> .env
       - name: Build images
         timeout-minutes: 4
         run: |
@@ -36,6 +39,13 @@ jobs:
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
            up --detach {bff,frontend}-prod
+      - name: Save images
+        timeout-minutes: 4
+        run: |
+          for service in bff frontend
+          do
+            docker save --output tmp/docker-image-${service} local.local/${service}:HEAD
+          done
       - name: Wait the service
         timeout-minutes: 4
         run: |
@@ -56,4 +66,12 @@ jobs:
           docker compose\
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
-           down
+           down --remove-orphans\
+           || true
+      - name: Upload docker images
+        timeout-minutes: 4
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-images
+          path: tmp/docker-image-*
+          retention-days: 1
