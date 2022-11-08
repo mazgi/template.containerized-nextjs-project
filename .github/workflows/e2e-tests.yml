@@ -61,6 +61,18 @@ jobs:
         timeout-minutes: 2
         run: |
           docker compose --profile=dev-all up --detach
+      - name: Wait services
+        timeout-minutes: 4
+        run: |
+          while :
+          do
+            test '["bff","frontend"]' = "$(
+              docker compose ps --format=json\
+              | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
+            )" && break
+            sleep 1
+          done
+          docker compose --profile=dev-all logs
       #
       # Test services
       - name: Test the service
