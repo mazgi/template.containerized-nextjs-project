@@ -1,12 +1,14 @@
-import { Status } from '../api/status'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
+import { Status } from '~/pages/api/status'
+import styles from '~/styles/Status.module.css'
 
 const Page: NextPage = () => {
   const [status, setStatus] = useState<Status>({
-    message: 'initial message',
-    version: '0.0.0',
+    name: 'initial name',
+    state: 'initial state',
+    version: '0.0.0+initial',
   })
 
   useEffect(() => {
@@ -23,10 +25,16 @@ const Page: NextPage = () => {
       <Head>
         <title>Status</title>
       </Head>
-      <main>
+      <main className={styles.main}>
         <h1>Status</h1>
-        <p>{status.message}</p>
-        <p>{status.version}</p>
+        <div className={styles.grid}>
+          <div className={styles.card}>
+            <h2>Frontend Status</h2>
+            <p>name: {status.name}</p>
+            <p>state: {status.state}</p>
+            <p>version: {status.version}</p>
+          </div>
+        </div>
       </main>
     </div>
   )

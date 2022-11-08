@@ -1,0 +1,38 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  /* border: 1px dotted lime; */
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  /* border: 1px dotted pink; */
+}
+
+.card {
+  width: 100%;
+  margin: 1rem;
+  padding: 1rem;
+  max-width: 360px;
+  border-radius: 8px;
+  transition: 0.1s all;
+  /* https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow */
+  box-shadow: 2px 4px 4px 2px rgba(1, 1, 1, 0.05);
+  border: 1px solid lightgray;
+  background-color: white;
+}
+@media screen and (max-width: 600px) {
+  .card {
+    width: 100%;
+  }
+}
+.card:hover {
+  transform: scale(1.1);
+}
