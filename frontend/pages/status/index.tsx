@@ -10,12 +10,28 @@ const Page: NextPage = () => {
     state: 'initial state',
     version: '0.0.0+initial',
   })
+  const [statusBff, setStatusBff] = useState<Status>({
+    name: 'initial name',
+    state: 'initial state',
+    version: '0.0.0+initial',
+  })
 
   useEffect(() => {
     const fetchStatus = async () => {
       const res = await fetch('/api/status')
       const json = await res.json()
       setStatus(json)
+    }
+    fetchStatus()
+  }, [])
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BFF_ENDPOINT_REST}/status`
+      )
+      const json = await res.json()
+      setStatusBff(json)
     }
     fetchStatus()
   }, [])
@@ -33,6 +49,12 @@ const Page: NextPage = () => {
             <p>name: {status.name}</p>
             <p>state: {status.state}</p>
             <p>version: {status.version}</p>
+          </div>
+          <div className={styles.card}>
+            <h2>BFF Status</h2>
+            <p>name: {statusBff.name}</p>
+            <p>state: {statusBff.state}</p>
+            <p>version: {statusBff.version}</p>
           </div>
         </div>
       </main>
