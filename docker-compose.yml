@@ -108,6 +108,8 @@ services:
       FRONTEND_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
     healthcheck:
       disable: true
+    ports:
+      - ${BIND_IP_ADDR:-127.0.0.1}:9223:9223
     profiles:
       - dev-all
     working_dir: /workspace/e2e-tests
