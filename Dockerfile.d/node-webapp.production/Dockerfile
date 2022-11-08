@@ -5,6 +5,8 @@ LABEL maintainer="docker@mazgi.com"
 # https://nodejs.org/en/blog/release/v18.12.0/
 ARG NODE_VERSION=18.12.0
 ENV NODE_VERSION=${NODE_VERSION:-18.12.0}
+ARG GIT_SHORT_SHA=xxxxxxx
+ENV GIT_SHORT_SHA=${GIT_SHORT_SHA:-xxxxxxx}
 
 # Set in non-interactive mode.
 ENV DEBIAN_FRONTEND=noninteractive

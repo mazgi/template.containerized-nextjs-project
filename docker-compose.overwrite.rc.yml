@@ -1,5 +1,7 @@
 x-service-node-webapp-production-base: &node-webapp-production-base
   build: &node-webapp-production-base-build
+    args:
+      GIT_SHORT_SHA: ${GIT_SHORT_SHA}
     context: .
     dockerfile: Dockerfile.d/node-webapp.production/Dockerfile
     target: base
