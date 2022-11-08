@@ -62,6 +62,12 @@ jobs:
         run: |
           docker compose --profile=dev-all up --detach
       #
+      # Test services
+      - name: Test the service
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all exec ${{ matrix.service }} npm run test
+      #
       # Clean up
       - name: Stop the service
         timeout-minutes: 1
