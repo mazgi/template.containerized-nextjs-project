@@ -83,6 +83,29 @@ services:
     profiles:
       - dev-all
       - test-watch
+  e2e-tests:
+    <<: *node-webapp-development-base
+    build:
+      args:
+        GID: ${GID:-0}
+        UID: ${UID:-0}
+      context: Dockerfile.d/e2e-tests
+    command:
+      - zsh
+      - --login
+      - -c
+      - |
+        npm-check-updates --upgrade
+        npm install
+        npm audit fix
+        sort-package-json
+        npx playwright install
+        sleep infinity
+    healthcheck:
+      disable: true
+    profiles:
+      - dev-all
+    working_dir: /workspace/e2e-tests
   frontend:
     <<: *frontend-base
     command:
