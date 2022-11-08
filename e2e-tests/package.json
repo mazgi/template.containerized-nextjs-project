@@ -2,11 +2,11 @@
   "scripts": {
     "fmt": "prettier --write \"{tests,tests-*}/**/*.ts\"",
     "lint": "eslint \"{tests,tests-*}/**/*.ts\"",
-    "show-report": "playwright show-report",
+    "show-report": "playwright show-report --host=0.0.0.0",
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.27.1",
+    "@playwright/test": "^1.28.0-alpha-nov-8-2022",
     "@types/node": "^18.11.9",
     "eslint": "^8.27.0",
     "prettier": "^2.7.1"

@@ -109,7 +109,8 @@ services:
     healthcheck:
       disable: true
     ports:
-      - ${BIND_IP_ADDR:-127.0.0.1}:9223:9223
+      # https://github.com/microsoft/playwright/pull/18517
+      - ${BIND_IP_ADDR:-127.0.0.1}:9323:9323
     profiles:
       - dev-all
     working_dir: /workspace/e2e-tests
