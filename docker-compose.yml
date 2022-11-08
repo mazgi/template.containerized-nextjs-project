@@ -34,7 +34,7 @@ x-service-bff-base: &bff-base
     - mysql
     - redis
   environment:
-    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:3000
+    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
