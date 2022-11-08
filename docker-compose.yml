@@ -80,7 +80,7 @@ services:
     healthcheck:
       disable: true
     profiles:
-      - all
+      - dev-all
       - test-watch
   frontend:
     <<: *frontend-base
@@ -112,7 +112,7 @@ services:
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
     profiles:
-      - all
+      - dev-all
       - tools
   frontend-test-watch:
     <<: *frontend-base
@@ -127,7 +127,7 @@ services:
     healthcheck:
       disable: true
     profiles:
-      - all
+      - dev-all
       - test-watch
 
   # Middlewares

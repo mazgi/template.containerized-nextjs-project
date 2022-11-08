@@ -25,6 +25,10 @@ BIND_IP_ADDR=192.168.0.1
 PUBLIC_IP_ADDR_OR_FQDN=203.0.113.1
 ```
 
+<details>
+
+<summary> :open_file_folder: Expand details for the .env file and environment variables...</summary>
+
 :information_source: If you are using Linux, write out UID, GID, and GID for the `docker` group, into the `.env` file to let that as exported on Docker Compose as environment variables.
 
 ```console
@@ -69,16 +73,28 @@ Environment variable names and uses are as follows.
 | BIND_IP_ADDR           | It's used to bind your services.                                 |
 | PUBLIC_IP_ADDR_OR_FQDN | It's used by the Frontend to connect the BFF you are developing. |
 
+</details>
+
 ### Step 2: Start services via Docker Compose
 
-You are able to start Docker Compose services/containers in the background and follow logs, as below.  
-If you want to stop tailing logs, type `^c`.
+You start Docker Compose services/containers as below.
 
 ```console
-docker compose up --detach && docker compose logs --follow
+docker compose up
 ```
 
-You are always able to start and stop to show logs for specific the service/container as below.
+<details>
+
+<summary> :open_file_folder: Expand additional operations for starting, testing, and more...</summary>
+
+You are able to start services in the background as below.
+
+```console
+docker compose up --detach
+```
+
+And you can start following logs for specific the service/container as below.  
+If you want to stop following logs, type `^c`.
 
 ```console
 docker compose logs --follow --no-log-prefix bff
@@ -88,6 +104,8 @@ docker compose logs --follow --no-log-prefix bff
 docker compose logs --follow --no-log-prefix frontend
 ```
 
+You run tests as below.
+
 ```console
 docker compose exec bff npm run test
 ```
@@ -95,6 +113,31 @@ docker compose exec bff npm run test
 ```console
 docker compose exec frontend npm run test
 ```
+
+If you want to run tests in the "watch" mode, you are able to start services to do it.
+
+```console
+docker compose --profile dev-all up
+```
+
+Or if you `up` any service to "watch" mode, it implicitly enabling the profile `dev-all`.
+
+```console
+docker compose up bff-test-watch
+```
+
+```console
+docker compose up frontend-test-watch
+```
+
+The following official documents help you understand the behavior on this page.
+
+- https://docs.docker.com/compose/profiles/
+- https://docs.docker.com/compose/extends/
+
+</details>
+
+And you are able to stop services as below.
 
 ```console
 docker compose down
