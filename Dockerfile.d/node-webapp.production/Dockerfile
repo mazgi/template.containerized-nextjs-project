@@ -43,12 +43,23 @@ ENTRYPOINT ["/usr/bin/tini", "--"]
 WORKDIR /workspace
 USER node
 
+FROM base AS builder-base
+USER root
+RUN :\
+  && apt-get update\
+  && apt-get install --assume-yes\
+  jq\
+  && :
+USER node
+
 # ================
 # BFF
 # ----------------
-FROM base AS bff-builder
+FROM builder-base AS bff-builder
 COPY --chown=node:node bff ./
 RUN :\
+  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json > /tmp/package.json\
+  && cat /tmp/package.json > package.json\
   && npm clean-install\
   && npm run build\
   && :
@@ -71,9 +82,11 @@ HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
 # ================
 # Frontend
 # ----------------
-FROM base AS frontend-builder
+FROM builder-base AS frontend-builder
 COPY --chown=node:node frontend ./
 RUN :\
+  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json > /tmp/package.json\
+  && cat /tmp/package.json > package.json\
   && npm clean-install --only=production\
   && npm cache clean --force\
   && npm run build\
