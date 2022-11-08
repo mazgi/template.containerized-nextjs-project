@@ -101,6 +101,11 @@ services:
         sort-package-json
         npx playwright install
         sleep infinity
+    depends_on:
+      - bff
+      - frontend
+    environment:
+      FRONTEND_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
     healthcheck:
       disable: true
     profiles:
