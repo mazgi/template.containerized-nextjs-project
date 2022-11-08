@@ -1,5 +1,8 @@
 {
   "scripts": {
+    "fmt": "prettier --write \"{tests,tests-*}/**/*.ts\"",
+    "lint": "eslint \"{tests,tests-*}/**/*.ts\"",
+    "show-report": "playwright show-report",
     "test": "playwright test"
   },
   "devDependencies": {
