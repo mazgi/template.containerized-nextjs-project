@@ -2,7 +2,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export type Status = {
-  message: string
+  name: string
+  state: string
   version: string
 }
 
@@ -11,7 +12,8 @@ export default function handler(
   res: NextApiResponse<Status>
 ) {
   res.status(200).json({
-    message: 'ok(frontend)',
-    version: '0.1.2',
+    name: process.env.npm_package_name || 'frontend+undef',
+    state: 'healthy',
+    version: process.env.npm_package_version || '0.0.0+undef',
   })
 }

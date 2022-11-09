@@ -1,5 +1,7 @@
 x-service-node-webapp-production-base: &node-webapp-production-base
   build: &node-webapp-production-base-build
+    args:
+      GIT_SHORT_SHA: ${GIT_SHORT_SHA}
     context: .
     dockerfile: Dockerfile.d/node-webapp.production/Dockerfile
     target: base
@@ -19,10 +21,10 @@ services:
       - mysql
       - redis
     environment:
-      ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:3000
+      ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend-prod}:13000
     image: local.local/bff:HEAD
     ports:
-      - ${BIND_IP_ADDR:-127.0.0.1}:4000:4000
+      - ${BIND_IP_ADDR:-127.0.0.1}:14000:4000
   frontend-prod:
     <<: *node-webapp-production-base
     build:
@@ -30,6 +32,6 @@ services:
       target: frontend-runner
     image: local.local/frontend:HEAD
     ports:
-      - ${BIND_IP_ADDR:-127.0.0.1}:3000:3000
+      - ${BIND_IP_ADDR:-127.0.0.1}:13000:3000
 
 version: '3.9'

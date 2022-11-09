@@ -1,0 +1,92 @@
+name: e2e-tests
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  start-test-stop:
+    timeout-minutes: 10
+    # See https://github.com/microsoft/playwright/issues/15764
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - e2e-tests
+    steps:
+      - uses: actions/checkout@v3
+      #
+      # Cache settings
+      - name: cache the pnpm store
+        uses: actions/cache@v3
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-dotpnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: cache user deps
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-dotnpm-${{ hashFiles('**/package-lock.json') }}
+      - name: cache workspace deps
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+      - name: cache service deps - ${{ matrix.service }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ matrix.service }}/node_modules
+          key: ${{ runner.os }}-${{ matrix.service }}-node_modules-${{ hashFiles('${{ matrix.service }}/package-lock.json') }}
+      #
+      # Envirinment settings
+      - name: Export UIDs as environment variables
+        run: |
+          echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
+          echo "GID=$(id -g)" >> .env
+          echo "UID=$(id -u)" >> .env
+      #
+      # Prepare services
+      - name: Pull containers
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all pull
+      - name: Build containers
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all build
+      - name: Start services
+        timeout-minutes: 2
+        run: |
+          docker compose --profile=dev-all up --detach
+      - name: Wait services
+        timeout-minutes: 4
+        run: |
+          while :
+          do
+            test '["bff","frontend"]' = "$(
+              docker compose ps --format=json\
+              | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
+            )" && break
+            sleep 1
+          done
+          docker compose --profile=dev-all logs
+      #
+      # Test services
+      - name: Lint the service
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all exec ${{ matrix.service }} npm run lint
+      - name: Test the service
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all exec ${{ matrix.service }} npm run test
+      #
+      # Clean up
+      - name: Stop the service
+        timeout-minutes: 1
+        run: |
+          docker compose --profile=dev-all down

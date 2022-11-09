@@ -1,13 +1,15 @@
-export type Status = {
-  message: string
-  version: string
-}
+import { Status } from './entities/status.entity'
+import { Injectable } from '@nestjs/common'
 
+@Injectable()
 export class StatusService {
-  getStatus(): Status {
-    return {
-      message: 'ok (bff)',
-      version: '0.1.2',
-    }
+  private readonly status: Status = {
+    name: process.env.npm_package_name || 'bff+undef',
+    state: 'healthy',
+    version: process.env.npm_package_version || '0.0.0+undef',
+  }
+
+  read(): Status {
+    return this.status
   }
 }

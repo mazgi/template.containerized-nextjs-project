@@ -34,7 +34,7 @@ x-service-bff-base: &bff-base
     - mysql
     - redis
   environment:
-    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:3000
+    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
@@ -46,8 +46,9 @@ x-service-frontend-base: &frontend-base
       HEALTHCHECK_URL: http://localhost:3000/api/status
     context: Dockerfile.d/node-webapp.development
   environment:
-    BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
-    BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:4000/graphql
+    NEXT_PUBLIC_BFF_ENDPOINT_REST: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/rest
+    NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
+    NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
   working_dir: /workspace/frontend
 
 services:
@@ -82,6 +83,37 @@ services:
     profiles:
       - dev-all
       - test-watch
+  e2e-tests:
+    <<: *node-webapp-development-base
+    build:
+      args:
+        GID: ${GID:-0}
+        UID: ${UID:-0}
+      context: Dockerfile.d/e2e-tests
+    command:
+      - zsh
+      - --login
+      - -c
+      - |
+        npm-check-updates --upgrade
+        npm install
+        npm audit fix
+        sort-package-json
+        npx playwright install
+        sleep infinity
+    depends_on:
+      - bff
+      - frontend
+    environment:
+      FRONTEND_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
+    healthcheck:
+      disable: true
+    ports:
+      # https://github.com/microsoft/playwright/pull/18517
+      - ${BIND_IP_ADDR:-127.0.0.1}:9323:9323
+    profiles:
+      - dev-all
+    working_dir: /workspace/e2e-tests
   frontend:
     <<: *frontend-base
     command:
