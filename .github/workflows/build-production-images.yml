@@ -24,7 +24,8 @@ jobs:
            pull
       - name: Store the short SHA hash
         run: |
-          echo GIT_SHORT_SHA=$(echo '${{ toJSON(github) }}' | jq -r '.sha[0:7]') >> .env
+          echo GIT_SHORT_SHA=${GITHUB_SHA::7} >> .env
+
       - name: Build images
         timeout-minutes: 4
         run: |

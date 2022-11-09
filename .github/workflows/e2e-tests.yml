@@ -76,6 +76,10 @@ jobs:
           docker compose --profile=dev-all logs
       #
       # Test services
+      - name: Lint the service
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all exec ${{ matrix.service }} npm run lint
       - name: Test the service
         timeout-minutes: 4
         run: |
