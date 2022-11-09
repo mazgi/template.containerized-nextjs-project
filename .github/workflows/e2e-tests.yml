@@ -10,7 +10,8 @@ env:
 jobs:
   start-test-stop:
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    # See https://github.com/microsoft/playwright/issues/15764
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
