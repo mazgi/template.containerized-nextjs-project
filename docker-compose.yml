@@ -25,8 +25,10 @@ x-service-node-webapp-development-base: &node-webapp-development-base
 x-service-bff-base: &bff-base
   <<: *node-webapp-development-base
   depends_on:
-    - mysql
-    - redis
+    mysql:
+      condition: service_started
+    redis:
+      condition: service_started
   environment:
     ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
   working_dir: /workspace/bff
@@ -51,7 +53,8 @@ services:
         npm install
         npm audit fix
         sort-package-json
-        /workspace/scripts/wait-mysql.zsh mysql
+        /workspace/scripts/wait-redis.bash redis
+        /workspace/scripts/wait-mysql.bash mysql
         npm run start:dev
     healthcheck:
       test:

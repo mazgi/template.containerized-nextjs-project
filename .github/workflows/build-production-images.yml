@@ -22,6 +22,13 @@ jobs:
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
            pull
+      - name: Start Middlewares
+        timeout-minutes: 1
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           up --detach mysql redis
       - name: Store the short SHA hash
         run: |
           echo GIT_SHORT_SHA=${GITHUB_SHA::7} >> .env
@@ -32,35 +39,67 @@ jobs:
           docker compose\
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
-           build {bff,frontend}-prod
+           build {bff,frontend}-prod e2e-tests
+      - name: Wait Redis
+        timeout-minutes: 1
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           run redis /workspace/scripts/wait-redis.bash redis
+      - name: Wait MySQL
+        timeout-minutes: 1
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           run mysql /workspace/scripts/wait-mysql.bash mysql
       - name: Start services
         timeout-minutes: 4
         run: |
           docker compose\
            --file docker-compose.yml\
            --file docker-compose.overwrite.rc.yml\
-           up --detach {bff,frontend}-prod
+           up --detach {bff,frontend}-prod e2e-tests
       - name: Save images
         timeout-minutes: 4
         run: |
           for service in bff frontend
           do
-            docker save --output tmp/docker-image-${service} local.local/${service}:HEAD
+            docker save --output tmp/docker-image-${service} local.local/no-name/${service}-prod:HEAD
           done
-      - name: Wait the service
+      - name: Wait services
         timeout-minutes: 4
         run: |
-          for service in {bff,frontend}-prod
+          while :
           do
-            while :
-            do
-              docker compose ps --format=json ${service}\
-              | jq -e '.[] | select(.Health=="healthy")' 2> /dev/null\
-              && break
-              sleep 1
-            done
-            docker compose logs ${service}
+            test '["bff-prod","frontend-prod"]' = "$(
+              docker compose\
+               --file docker-compose.yml\
+               --file docker-compose.overwrite.rc.yml\
+               ps {bff,frontend}-prod\
+               --format=json\
+              | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
+            )" && break
+            sleep 4
           done
+          docker compose logs
+      - name: Show logs - bff-prod
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           logs bff-prod
+      - name: Show logs - frontend-prod
+        run: |
+          docker compose\
+           --file docker-compose.yml\
+           --file docker-compose.overwrite.rc.yml\
+           logs frontend-prod
+      - name: (Todo)Run e2e tests
+        timeout-minutes: 4
+        run: |
+          :
       - name: Stop services
         timeout-minutes: 1
         run: |
