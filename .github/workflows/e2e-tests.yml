@@ -12,11 +12,6 @@ jobs:
     timeout-minutes: 10
     # See https://github.com/microsoft/playwright/issues/15764
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        service:
-          - e2e-tests
     steps:
       - uses: actions/checkout@v3
       #
@@ -36,11 +31,21 @@ jobs:
         with:
           path: node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
-      - name: cache service deps - ${{ matrix.service }}
+      - name: cache service deps - bff
         uses: actions/cache@v3
         with:
-          path: ${{ matrix.service }}/node_modules
-          key: ${{ runner.os }}-${{ matrix.service }}-node_modules-${{ hashFiles('${{ matrix.service }}/package-lock.json') }}
+          path: bff/node_modules
+          key: ${{ runner.os }}-bff-node_modules-${{ hashFiles('bff/package-lock.json') }}
+      - name: cache service deps - e2e-tests
+        uses: actions/cache@v3
+        with:
+          path: e2e-tests/node_modules
+          key: ${{ runner.os }}-e2e-tests-node_modules-${{ hashFiles('e2e-tests/package-lock.json') }}
+      - name: cache service deps - frontend
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-node_modules-${{ hashFiles('frontend/package-lock.json') }}
       #
       # Envirinment settings
       - name: Export UIDs as environment variables
@@ -53,40 +58,34 @@ jobs:
       - name: Pull containers
         timeout-minutes: 4
         run: |
-          docker compose --profile=dev-all pull
+          docker compose pull --include-deps bff e2e-tests frontend
       - name: Build containers
         timeout-minutes: 4
         run: |
-          docker compose --profile=dev-all build
+          docker compose build bff e2e-tests frontend
       - name: Start services
-        timeout-minutes: 2
-        run: |
-          docker compose --profile=dev-all up --detach
-      - name: Wait services
         timeout-minutes: 4
         run: |
-          while :
-          do
-            test '["bff","frontend"]' = "$(
-              docker compose ps --format=json\
-              | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
-            )" && break
-            sleep 1
-          done
-          docker compose --profile=dev-all logs
+          docker compose up --wait bff e2e-tests frontend
+      - name: Show logs - bff
+        run: |
+          docker compose logs bff
+      - name: Show logs - frontend
+        run: |
+          docker compose logs frontend
       #
       # Test services
       - name: Lint the service
         timeout-minutes: 4
         run: |
-          docker compose --profile=dev-all exec ${{ matrix.service }} npm run lint
+          docker compose exec e2e-tests npm run lint
       - name: Test the service
         timeout-minutes: 4
         run: |
-          docker compose --profile=dev-all exec ${{ matrix.service }} npm run test
+          docker compose exec e2e-tests npm run test
       #
       # Clean up
       - name: Stop the service
         timeout-minutes: 1
         run: |
-          docker compose --profile=dev-all down
+          docker compose down --remove-orphans
