@@ -162,7 +162,7 @@ jobs:
         run: |
           echo TAG_SUFFIX="$(date +%Y%m-)${SHORT_SHA}" >> $GITHUB_ENV
       #
-      # Publish images to the registry - ghcr.io
+      # Tag the image to the registry - ghcr.io
       - name: Generate tag prefix for ghcr.io
         if: ${{ matrix.platform == 'ghcr.io' }}
         run: |
@@ -172,7 +172,9 @@ jobs:
         run: |
           echo ${{ secrets.TOKEN_TO_PUSH_GHCR }} | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
 
+      # Push the image to the registry
       - name: Push the image - ${{ matrix.service }}, ${{ matrix.platform }}
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           docker tag local.local/no-name/${{ matrix.service }}-prod:HEAD ${TAG_PREFIX}:${TAG_SUFFIX}
           docker push ${TAG_PREFIX}:${TAG_SUFFIX}
