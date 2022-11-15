@@ -14,7 +14,8 @@ env:
 
 jobs:
   start-build-test-stop-save:
-    if: contains(github.event.pull_request.labels.*.name, 'ready-for-production-build')
+    # Todo: labeled, tagged, and pushed to main
+    # if: contains(github.event.pull_request.labels.*.name, 'ready-for-production-build')
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
