@@ -7,7 +7,7 @@ x-service-node-webapp-production-base: &node-webapp-production-base
     target: base
   # https://docs.docker.com/compose/compose-file/compose-file-v3/#build
   # > If you specify image as well as build, then Compose names the built image with the webapp and optional tag specified in image:
-  image: base
+  image: local.local/${PROJECT_UNIQUE_ID:-no-name}/base-prod:HEAD
   init: true
   pull_policy: never
 
@@ -21,8 +21,8 @@ services:
       - mysql
       - redis
     environment:
-      ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend-prod}:13000
-    image: local.local/bff:HEAD
+      ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:13000
+    image: local.local/${PROJECT_UNIQUE_ID:-no-name}/bff-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:14000:4000
   frontend-prod:
@@ -30,7 +30,7 @@ services:
     build:
       <<: *node-webapp-production-base-build
       target: frontend-runner
-    image: local.local/frontend:HEAD
+    image: local.local/${PROJECT_UNIQUE_ID:-no-name}/frontend-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:13000:3000
 

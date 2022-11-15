@@ -170,12 +170,12 @@ jobs:
 
       - name: Push the image - ${{ matrix.service }}, ${{ matrix.platform }}
         run: |
-          docker tag local.local/${{ matrix.service }}:HEAD ${TAG_PREFIX}:${TAG_SUFFIX}
+          docker tag local.local/no-name/${{ matrix.service }}-prod:HEAD ${TAG_PREFIX}:${TAG_SUFFIX}
           docker push ${TAG_PREFIX}:${TAG_SUFFIX}
       - name: Push the image as latest - ${{ matrix.service }}, ${{ matrix.platform }}
         if: github.ref == 'refs/heads/main'
         run: |
-          docker tag local.local/${{ matrix.service }}:HEAD ${TAG_PREFIX}:latest
+          docker tag local.local/no-name/${{ matrix.service }}-prod:HEAD ${TAG_PREFIX}:latest
           docker push ${TAG_PREFIX}:latest
 
   cleanup-artifacts:
