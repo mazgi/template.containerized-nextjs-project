@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 as base
+FROM ubuntu:22.04 AS base
 
 LABEL maintainer="docker@mazgi.com"
 
@@ -11,7 +11,7 @@ ENV GIT_SHORT_SHA=${GIT_SHORT_SHA:-xxxxxxx}
 # Set in non-interactive mode.
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN : Create the user and working directory\
+RUN : Create the node user and working directory\
   && groupadd --gid 10000 node\
   && useradd --uid 10000 --gid node --shell /bin/bash --create-home node\
   && mkdir /workspace\
