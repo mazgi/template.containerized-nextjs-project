@@ -8,7 +8,7 @@ x-service-node-webapp-production-base: &node-webapp-production-base
   # https://docs.docker.com/compose/compose-file/compose-file-v3/#build
   # > If you specify image as well as build, then Compose names the built image with the webapp and optional tag specified in image:
   image: local.local/${PROJECT_UNIQUE_ID:-no-name}/base-prod:HEAD
-  init: true
+  init: false # because tiny is specified as the entrypoint on the Dockerfile
   pull_policy: never
 
 services:
