@@ -91,7 +91,7 @@ docker compose up
 You are able to start services in the background as below.
 
 ```console
-docker compose up --detach
+docker compose up --wait
 ```
 
 And you can start following logs for specific the service/container as below.  
