@@ -53,7 +53,7 @@ jobs:
       - name: Pull containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
-          docker compose pull ${{ matrix.service }}
+          docker compose pull --include-deps ${{ matrix.service }}
       - name: Build containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
@@ -61,17 +61,10 @@ jobs:
       - name: Start the service - ${{ matrix.service }}
         timeout-minutes: 2
         run: |
-          docker compose up --detach ${{ matrix.service }}
-      - name: Wait the service - ${{ matrix.service }}
-        timeout-minutes: 4
+          docker compose up --wait ${{ matrix.service }}
+      - name: Show logs - ${{ matrix.service }}
+        timeout-minutes: 1
         run: |
-          while :
-          do
-            docker compose ps --format=json ${{ matrix.service }}\
-             | jq --exit-status '.[] | select(.Health=="healthy")' 2> /dev/null\
-             && break
-            sleep 1
-          done
           docker compose logs ${{ matrix.service }}
       #
       # Test services

@@ -4,7 +4,7 @@ readonly url="$1"
 
 until curl -LI "$url" 2> /dev/null; do
   >&2 echo "${url} is unavailable - waiting"
-  sleep 4
+  sleep 2
 done
 
 >&2 echo "${url} is up!"
