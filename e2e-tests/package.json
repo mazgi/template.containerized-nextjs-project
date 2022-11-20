@@ -6,10 +6,10 @@
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.28.0-alpha-nov-8-2022",
+    "@playwright/test": "^1.28.0",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
-    "eslint": "^8.27.0",
+    "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.7.1"
   }
