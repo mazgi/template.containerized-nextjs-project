@@ -9,6 +9,7 @@
     "dev:debug": "NODE_OPTIONS='--inspect=0.0.0.0:9229' next dev",
     "fmt": "next lint --dir . --fix; prettier --write .",
     "lint": "next lint --dir .; prettier --check .",
+    "openapi:generate:client": "rm -rf lib/client/rest && openapi2aspida --input=${NEXT_PUBLIC_BFF_ENDPOINT_REST_BASE_PATH}/swagger-json --outputdir=lib/client/rest",
     "start": "next start",
     "storybook": "start-storybook -p 6006",
     "test": "jest --passWithNoTests",
