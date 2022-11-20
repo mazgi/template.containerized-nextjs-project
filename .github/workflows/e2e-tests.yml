@@ -76,13 +76,17 @@ jobs:
       #
       # Test services
       - name: Lint the service
-        timeout-minutes: 4
+        timeout-minutes: 1
         run: |
           docker compose exec e2e-tests npm run lint
+      - name: List the tests
+        timeout-minutes: 1
+        run: |
+          docker compose exec e2e-tests npm run test -- --list
       - name: Test the service
         timeout-minutes: 4
         run: |
-          docker compose exec e2e-tests npm run test
+          docker compose exec e2e-tests npm run test -- --reporter=line
       #
       # Clean up
       - name: Stop the service
