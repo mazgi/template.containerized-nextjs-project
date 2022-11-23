@@ -1,5 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig()
 
 export type Status = {
   name: string
@@ -12,8 +15,8 @@ export default function handler(
   res: NextApiResponse<Status>
 ) {
   res.status(200).json({
-    name: process.env.npm_package_name || 'frontend+undef',
+    name: publicRuntimeConfig.PACKAGE_NAME,
     state: 'healthy',
-    version: process.env.npm_package_version || '0.0.0+undef',
+    version: publicRuntimeConfig.PACKAGE_VERSION,
   })
 }
