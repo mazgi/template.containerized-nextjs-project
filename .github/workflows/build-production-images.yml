@@ -17,9 +17,14 @@ jobs:
     # Todo: labeled, tagged, and pushed to main
     # if: contains(github.event.pull_request.labels.*.name, 'ready-for-production-build')
     timeout-minutes: 10
+    # See https://github.com/microsoft/playwright/issues/15764
     runs-on: ubuntu-22.04
+    #
+    # The steps are crossing to reduce the minutes in actions :money_with_wings:
     steps:
       - uses: actions/checkout@v3
+      #
+      # To validate production images: (1/4)
       - name: Pull images
         timeout-minutes: 4
         run: |
@@ -28,12 +33,16 @@ jobs:
         timeout-minutes: 1
         run: |
           docker compose up --detach mysql redis
+      #
+      # To build and upload production images: (1/3)
       - name: Build images
         timeout-minutes: 4
         run: |
           docker compose\
            build --build-arg=GIT_SHORT_SHA=${GITHUB_SHA::7}\
            {bff,frontend}-prod
+      #
+      # To validate production images: (2/4)
       - name: Wait Redis
         timeout-minutes: 1
         run: |
@@ -46,6 +55,8 @@ jobs:
         timeout-minutes: 4
         run: |
           docker compose up --detach {bff,frontend}-prod e2e-tests
+      #
+      # To build and upload production images: (2/3)
       - name: Save images
         timeout-minutes: 4
         run: |
@@ -53,6 +64,8 @@ jobs:
           do
             docker save --output tmp/docker-image-${service} local.local/no-name/${service}-prod:HEAD
           done
+      #
+      # To validate production images: (3/4)
       - name: Wait services
         timeout-minutes: 4
         run: |
@@ -73,6 +86,8 @@ jobs:
         timeout-minutes: 1
         run: |
           docker compose logs frontend-prod
+      #
+      # To validate production images: (4/4)
       - name: List e2e tests
         timeout-minutes: 1
         run: |
@@ -95,6 +110,8 @@ jobs:
         timeout-minutes: 1
         run: |
           docker compose --profile=all down
+      #
+      # To build and upload production images: (3/3)
       - name: Upload docker images as artifact
         timeout-minutes: 4
         uses: actions/upload-artifact@v3
