@@ -60,7 +60,7 @@ jobs:
         run: |
           docker compose pull --include-deps bff e2e-tests frontend
       - name: Build containers
-        timeout-minutes: 4
+        timeout-minutes: 8
         run: |
           docker compose build bff e2e-tests frontend
       - name: Start services
