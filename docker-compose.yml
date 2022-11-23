@@ -36,7 +36,7 @@ x-service-bff-base: &bff-base
 x-service-frontend-base: &frontend-base
   <<: *node-webapp-development-base
   environment:
-    NEXT_PUBLIC_BFF_ENDPOINT_REST: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/rest
+    NEXT_PUBLIC_BFF_ENDPOINT_REST_BASE_PATH: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
     NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
     NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
   working_dir: /workspace/frontend
@@ -107,6 +107,8 @@ services:
         npx playwright install
         sleep infinity
     environment:
+      BFF_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
+      E2E_TARGET_NODE_ENV: development
       FRONTEND_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
     ports:
       # https://github.com/microsoft/playwright/pull/18517
