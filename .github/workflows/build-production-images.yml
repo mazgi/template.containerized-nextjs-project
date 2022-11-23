@@ -77,17 +77,17 @@ jobs:
         timeout-minutes: 1
         run: |
           docker compose exec\
-           --env=BFF_URL=http://bff-prod:14000\
+           --env=BFF_URL=http://bff-prod:4000\
            --env=E2E_TARGET_NODE_ENV=production\
-           --env=FRONTEND_URL=http://frontend-prod:13000\
+           --env=FRONTEND_URL=http://frontend-prod:3000\
            e2e-tests npm run test -- --list
       - name: Run e2e tests
         timeout-minutes: 4
         run: |
           docker compose exec\
-           --env=BFF_URL=http://bff-prod:14000\
+           --env=BFF_URL=http://bff-prod:4000\
            --env=E2E_TARGET_NODE_ENV=production\
-           --env=FRONTEND_URL=http://frontend-prod:13000\
+           --env=FRONTEND_URL=http://frontend-prod:3000\
            e2e-tests npm run test -- --reporter=line
       #
       # Clean up
