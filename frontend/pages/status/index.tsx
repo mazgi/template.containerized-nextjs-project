@@ -10,8 +10,7 @@ import styles from '~/styles/Status.module.css'
 const BFFStatus: React.FC = () => {
   const client = api(
     aspida(fetch, {
-      baseURL:
-        process.env.NEXT_PUBLIC_BFF_ENDPOINT_REST_BASE_PATH || 'undef.local',
+      baseURL: '/api',
     })
   )
   const { data, error } = useAspidaSWR(client.rest.status)
