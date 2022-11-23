@@ -60,7 +60,7 @@ jobs:
         run: |
           docker compose pull --include-deps bff e2e-tests frontend
       - name: Build containers
-        timeout-minutes: 4
+        timeout-minutes: 8
         run: |
           docker compose build bff e2e-tests frontend
       - name: Start services
@@ -92,4 +92,4 @@ jobs:
       - name: Stop the service
         timeout-minutes: 1
         run: |
-          docker compose down --remove-orphans
+          docker compose --profile=all down

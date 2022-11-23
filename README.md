@@ -84,6 +84,12 @@ You start Docker Compose services/containers as below.
 docker compose up
 ```
 
+Now you can access your services at the following ports.
+
+- Frontend: `http://${PUBLIC_IP_ADDR_OR_FQDN}:3000`
+- BFF: `http://${PUBLIC_IP_ADDR_OR_FQDN}:4000`
+- Storybook: `http://${PUBLIC_IP_ADDR_OR_FQDN}:6006`
+
 <details>
 
 <summary> :open_file_folder: Expand additional operations for starting, testing, and more...</summary>

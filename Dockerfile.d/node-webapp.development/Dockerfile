@@ -5,6 +5,7 @@ ARG GID=0
 ARG UID=0
 ENV GID=${GID:-0}
 ENV UID=${UID:-0}
+ENV NODE_ENV=development
 
 RUN :\
   # Create the development user with the same UID and GID as you.
