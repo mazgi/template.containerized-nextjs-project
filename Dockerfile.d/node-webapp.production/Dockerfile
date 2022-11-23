@@ -1,23 +1,24 @@
-FROM ubuntu:22.04 AS base
-
-LABEL maintainer="docker@mazgi.com"
-
-# https://nodejs.org/en/blog/release/v18.12.0/
-ARG NODE_VERSION=18.12.0
-ENV NODE_VERSION=${NODE_VERSION:-18.12.0}
-ARG GIT_SHORT_SHA=xxxxxxx
-ENV GIT_SHORT_SHA=${GIT_SHORT_SHA:-xxxxxxx}
-
 # Set in non-interactive mode.
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN : Create the node user and working directory\
-  && groupadd --gid 10000 node\
-  && useradd --uid 10000 --gid node --shell /bin/bash --create-home node\
+FROM ubuntu:22.04 AS base
+LABEL maintainer="docker@mazgi.com"
+ARG NODE_USER_GID=10000
+ARG NODE_USER_UID=10000
+# https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V18.md
+ARG NODE_VERSION=18.12.1
+RUN :\
+  && : Create the node user: UID=${NODE_USER_UID}, GID=${NODE_USER_GID}\
+  && groupadd --gid ${NODE_USER_GID} node\
+  && useradd --uid ${NODE_USER_UID} --gid node --shell /bin/bash --create-home node\
+  #   && :
+  # RUN :\
+  && : Create the working directory\
   && mkdir /workspace\
   && chown -R node:node /workspace\
-  && :
-RUN : Install basic packages\
+  #   && :
+  # RUN :\
+  && : Install basic packages\
   && echo 'apt::install-recommends "false";' > /etc/apt/apt.conf.d/no-install-recommends\
   && apt-get update\
   && apt-get install --assume-yes\
@@ -44,12 +45,14 @@ WORKDIR /workspace
 USER node
 
 FROM base AS builder-base
+# become the root user temporally to install OS packages.
 USER root
 RUN :\
   && apt-get update\
   && apt-get install --assume-yes\
   jq\
   && :
+# restore the user
 USER node
 
 # ================
@@ -57,26 +60,30 @@ USER node
 # ----------------
 FROM builder-base AS bff-builder
 COPY --chown=node:node bff ./
-RUN :\
-  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json > /tmp/package.json\
+ARG GIT_SHORT_SHA
+RUN : Update pkg version with GIT_SHORT_SHA: ${GIT_SHORT_SHA}\
+  && test ! -z "${GIT_SHORT_SHA}"\
+  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json | tee /tmp/package.json\
   && cat /tmp/package.json > package.json\
+  && :
+RUN : Install deps\
   && npm clean-install\
   && npm run build\
   && :
 
 FROM base AS bff-runner
-ENV DATABASE_URL=mysql://localhost:3306
 ENV NODE_ENV=production
-COPY --chown=node:node bff/package*.json ./
+ENV PORT=4000
+EXPOSE ${PORT}
+COPY --from=bff-builder --chown=node:node /workspace/package*.json ./
 RUN :\
   && npm clean-install --only=production\
   && npm cache clean --force\
   && :
-COPY --from=bff-builder --chown=node:node /workspace/dist ./
-CMD [ "node", "main.js" ]
-EXPOSE 4000
+COPY --from=bff-builder --chown=node:node /workspace/dist ./dist
+CMD [ "npm", "run", "start:prod" ]
 HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
-  CMD curl --fail --output /dev/null --silent 'http://localhost:4000/rest/status'
+  CMD curl --fail --output /dev/null --silent "http://localhost:${PORT}/rest/status"
 # ================
 
 # ================
@@ -84,9 +91,13 @@ HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
 # ----------------
 FROM builder-base AS frontend-builder
 COPY --chown=node:node frontend ./
-RUN :\
-  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json > /tmp/package.json\
+ARG GIT_SHORT_SHA
+RUN : Update pkg version with GIT_SHORT_SHA: ${GIT_SHORT_SHA}\
+  && test ! -z "${GIT_SHORT_SHA}"\
+  && jq '.version += "+'${GIT_SHORT_SHA}'"' package.json | tee /tmp/package.json\
   && cat /tmp/package.json > package.json\
+  && :
+RUN : Install deps\
   && npm clean-install --only=production\
   && npm cache clean --force\
   && npm run build\
@@ -94,11 +105,14 @@ RUN :\
 
 FROM base AS frontend-runner
 ENV NODE_ENV=production
+# https://github.com/vercel/next.js/pull/26066#issue-920261025
+# > Adds support for PORT (See Added support for process.env.PORT #11408)
+ENV PORT=3000
+EXPOSE ${PORT}
 COPY --from=frontend-builder --chown=node:node /workspace/public ./public
 COPY --from=frontend-builder --chown=node:node /workspace/.next/standalone ./
 COPY --from=frontend-builder --chown=node:node /workspace/.next/static ./.next/static
 CMD [ "node", "server.js" ]
-EXPOSE 3000
 HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
-  CMD curl --fail --output /dev/null --silent 'http://localhost:3000/api/status'
+  CMD curl --fail --output /dev/null --silent "http://localhost:${PORT}/api/status"
 # ================

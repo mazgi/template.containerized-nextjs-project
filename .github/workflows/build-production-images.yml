@@ -17,55 +17,35 @@ jobs:
     # Todo: labeled, tagged, and pushed to main
     # if: contains(github.event.pull_request.labels.*.name, 'ready-for-production-build')
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Pull images
         timeout-minutes: 4
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           pull
+          docker compose pull
       - name: Start Middlewares
         timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           up --detach mysql redis
-      - name: Store the short SHA hash
-        run: |
-          echo GIT_SHORT_SHA=${GITHUB_SHA::7} >> .env
-
+          docker compose up --detach mysql redis
       - name: Build images
         timeout-minutes: 4
         run: |
           docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           build {bff,frontend}-prod e2e-tests
+           build --build-arg=GIT_SHORT_SHA=${GITHUB_SHA::7}\
+           {bff,frontend}-prod
       - name: Wait Redis
         timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           run redis /workspace/scripts/wait-redis.bash redis
+          docker compose run redis /workspace/scripts/wait-redis.bash redis
       - name: Wait MySQL
         timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           run mysql /workspace/scripts/wait-mysql.bash mysql
+          docker compose run mysql /workspace/scripts/wait-mysql.bash mysql
       - name: Start services
         timeout-minutes: 4
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           up --detach {bff,frontend}-prod e2e-tests
+          docker compose up --detach {bff,frontend}-prod e2e-tests
       - name: Save images
         timeout-minutes: 4
         run: |
@@ -79,41 +59,43 @@ jobs:
           while :
           do
             test '["bff-prod","frontend-prod"]' = "$(
-              docker compose\
-               --file docker-compose.yml\
-               --file docker-compose.overwrite.rc.yml\
-               ps {bff,frontend}-prod\
-               --format=json\
-              | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
+              docker compose ps {bff,frontend}-prod --format=json\
+               | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null
             )" && break
             sleep 4
           done
           docker compose logs
       - name: Show logs - bff-prod
+        timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           logs bff-prod
+          docker compose logs bff-prod
       - name: Show logs - frontend-prod
+        timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           logs frontend-prod
-      - name: (Todo)Run e2e tests
+          docker compose logs frontend-prod
+      - name: List e2e tests
+        timeout-minutes: 1
+        run: |
+          docker compose exec\
+           --env=BFF_URL=http://bff-prod:14000\
+           --env=E2E_TARGET_NODE_ENV=production\
+           --env=FRONTEND_URL=http://frontend-prod:13000\
+           e2e-tests npm run test -- --list
+      - name: Run e2e tests
         timeout-minutes: 4
         run: |
-          :
+          docker compose exec\
+           --env=BFF_URL=http://bff-prod:14000\
+           --env=E2E_TARGET_NODE_ENV=production\
+           --env=FRONTEND_URL=http://frontend-prod:13000\
+           e2e-tests npm run test -- --reporter=line
+      #
+      # Clean up
       - name: Stop services
         timeout-minutes: 1
         run: |
-          docker compose\
-           --file docker-compose.yml\
-           --file docker-compose.overwrite.rc.yml\
-           down --remove-orphans\
-           || true
-      - name: Upload docker images
+          docker compose --profile=all down
+      - name: Upload docker images as artifact
         timeout-minutes: 4
         uses: actions/upload-artifact@v3
         with:
@@ -123,7 +105,7 @@ jobs:
 
   publish-docker-images:
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - start-build-test-stop-save
     strategy:
@@ -187,7 +169,7 @@ jobs:
 
   cleanup-artifacts:
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - publish-docker-images
     steps:
