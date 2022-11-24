@@ -49,9 +49,9 @@ x-service-bff-base: &bff-base
 x-service-frontend-base: &frontend-base
   <<: *node-webapp-development-base
   environment:
-    NEXT_PUBLIC_BFF_ENDPOINT_REST_BASE_PATH: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
-    NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
-    NEXT_PUBLIC_BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
+    FRONTEND_BFF_ENDPOINT_GRAPHQL_HTTP: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
+    FRONTEND_BFF_ENDPOINT_GRAPHQL_WEBSOCKET: ws://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000/graphql
+    FRONTEND_BFF_ENDPOINT_REST: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
   working_dir: /workspace/frontend
 
 services:
@@ -184,7 +184,7 @@ services:
       <<: *node-webapp-production-base-build
       target: frontend-runner
     environment:
-      FRONTEND_BFF_ENDPOINT_REST: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:14000
+      FRONTEND_BFF_ENDPOINT_REST: http://bff-prod:4000
     image: local.local/${PROJECT_UNIQUE_ID:-no-name}/frontend-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:13000:3000
