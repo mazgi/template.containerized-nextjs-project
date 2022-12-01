@@ -42,8 +42,6 @@ x-service-bff-base: &bff-base
       condition: service_started
     redis:
       condition: service_started
-  environment:
-    ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
@@ -111,8 +109,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      ALLOW_ORIGIN: http://${PUBLIC_IP_ADDR_OR_FQDN:-127.0.0.1}:13000
     image: local.local/${PROJECT_UNIQUE_ID:-no-name}/bff-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:14000:4000

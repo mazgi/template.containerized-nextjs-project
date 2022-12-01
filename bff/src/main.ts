@@ -4,10 +4,6 @@ import { AppModule } from '~/src/app.module'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  app.enableCors({
-    origin: process.env.ALLOW_ORIGIN,
-    credentials: true,
-  })
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle(`${process.env.npm_package_name || 'bff+undef'} REST Web API`)
