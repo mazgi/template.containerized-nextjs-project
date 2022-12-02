@@ -151,7 +151,7 @@ services:
       - --login
       - -c
       - |
-        npm-check-updates --upgrade
+        npm-check-updates --upgrade \!openapi2aspida
         npm install
         npm audit fix
         sort-package-json
