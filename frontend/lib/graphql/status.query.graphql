@@ -1,0 +1,7 @@
+query statusQuery {
+  status {
+    name
+    state
+    version
+  }
+}
