@@ -14,7 +14,7 @@ import { GraphQLModule } from '@nestjs/graphql'
     // https://docs.nestjs.com/recipes/router-module
     RouterModule.register([
       {
-        path: 'rest',
+        path: 'openapi',
         children: [StatusModule],
       },
     ]),

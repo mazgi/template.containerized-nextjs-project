@@ -1,13 +1,13 @@
-import type { Methods as Methods0 } from './rest/status'
+import type { Methods as Methods0 } from './openapi/status'
 import type { AspidaClient, BasicHeaders } from 'aspida'
 
 const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
   const prefix = (baseURL === undefined ? '' : baseURL).replace(/\/$/, '')
-  const PATH0 = '/rest/status'
+  const PATH0 = '/openapi/status'
   const GET = 'GET'
 
   return {
-    rest: {
+    openapi: {
       status: {
         /**
          * @returns The service status.

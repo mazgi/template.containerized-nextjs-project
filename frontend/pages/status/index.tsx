@@ -3,7 +3,7 @@ import useAspidaSWR from '@aspida/swr'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { Fragment, useEffect, useState } from 'react'
-import api from '~/lib/client/rest/$api'
+import api from '~/lib/client/openapi/$api'
 import { Status } from '~/pages/api/status'
 import styles from '~/styles/Status.module.css'
 
@@ -13,7 +13,7 @@ const BFFStatus: React.FC = () => {
       baseURL: '/api',
     })
   )
-  const { data, error } = useAspidaSWR(client.rest.status)
+  const { data, error } = useAspidaSWR(client.openapi.status)
   if (error)
     return (
       <Fragment>

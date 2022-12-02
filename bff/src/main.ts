@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle(`${process.env.npm_package_name || 'bff+undef'} REST Web API`)
+      .setTitle(`${process.env.npm_package_name || 'bff+undef'} OpenAPI`)
       .setDescription('The Swagger UI')
       .setVersion(process.env.npm_package_version || '0.0.0+undef')
       .build()
