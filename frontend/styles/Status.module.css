@@ -18,9 +18,9 @@
 
 .card {
   width: 100%;
-  margin: 1rem;
-  padding: 1rem;
-  max-width: 360px;
+  margin: 0.8rem;
+  padding: 0.6rem;
+  max-width: 220px;
   border-radius: 8px;
   transition: 0.1s all;
   /* https://developer.mozilla.org/en-US/docs/Web/CSS/box-shadow */
