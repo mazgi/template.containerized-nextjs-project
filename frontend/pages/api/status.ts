@@ -1,14 +1,8 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
 import getConfig from 'next/config'
+import { Status } from '~/lib/generated/openapi/@types'
 
 const { publicRuntimeConfig } = getConfig()
-
-export type Status = {
-  name: string
-  state: string
-  version: string
-}
 
 export default function handler(
   req: NextApiRequest,
