@@ -1,6 +1,6 @@
-import { Status } from './entities/status.entity'
+import { Status } from '../entities/status.entity'
+import { StatusService } from '../status.service'
 import { StatusController } from './status.controller'
-import { StatusService } from './status.service'
 import { Test, TestingModule } from '@nestjs/testing'
 
 describe('StatusController', () => {

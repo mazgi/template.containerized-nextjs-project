@@ -1,9 +1,8 @@
-import { StatusModule as GraphQLStatusModule } from './graphql/status.module'
+import { StatusModule } from './modules/status/status.module'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { RouterModule } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
-import { StatusModule as RESTStatusModule } from '~/src/rest/status/status.module'
 
 @Module({
   imports: [
@@ -11,13 +10,12 @@ import { StatusModule as RESTStatusModule } from '~/src/rest/status/status.modul
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
-    RESTStatusModule,
-    GraphQLStatusModule,
+    StatusModule,
     // https://docs.nestjs.com/recipes/router-module
     RouterModule.register([
       {
         path: 'rest',
-        children: [RESTStatusModule],
+        children: [StatusModule],
       },
     ]),
   ],

@@ -1,6 +1,6 @@
+import { StatusService } from '../status.service'
 import { StatusResolver } from './status.resolver'
 import { Test, TestingModule } from '@nestjs/testing'
-import { StatusService } from '~/src/rest/status/status.service'
 
 describe('StatusResolver', () => {
   let resolver: StatusResolver

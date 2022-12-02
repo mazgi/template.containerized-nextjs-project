@@ -1,5 +1,5 @@
-import { Status } from './entities/status.entity'
-import { StatusService } from './status.service'
+import { Status } from '../entities/status.entity'
+import { StatusService } from '../status.service'
 import { Controller, Get } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger'
 
@@ -11,6 +11,7 @@ export class StatusController {
   @ApiOperation({ summary: 'Get the service status.' })
   @ApiOkResponse({ type: Status, description: 'The service status.' })
   read() {
-    return this.service.read()
+    const result = this.service.read()
+    return result
   }
 }

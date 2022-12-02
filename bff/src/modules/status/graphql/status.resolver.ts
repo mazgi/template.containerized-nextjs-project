@@ -1,6 +1,6 @@
-import { Status } from './entities/status.entity'
+import { Status } from '../entities/status.entity'
+import { StatusService } from '../status.service'
 import { Query, Resolver } from '@nestjs/graphql'
-import { StatusService } from '~/src/rest/status/status.service'
 
 @Resolver()
 export class StatusResolver {
