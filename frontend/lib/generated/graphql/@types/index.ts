@@ -28,6 +28,8 @@ export enum State {
 
 export type Status = {
   __typename?: 'Status'
+  /** The service environment of BFF */
+  environment: Scalars['String']
   /** The service name of BFF */
   name: Scalars['String']
   /** The state of BFF */

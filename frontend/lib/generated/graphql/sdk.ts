@@ -37,6 +37,8 @@ export enum State {
 
 export type Status = {
   __typename?: 'Status'
+  /** The service environment of BFF */
+  environment: Scalars['String']
   /** The service name of BFF */
   name: Scalars['String']
   /** The state of BFF */
@@ -49,13 +51,20 @@ export type StatusQueryQueryVariables = Exact<{ [key: string]: never }>
 
 export type StatusQueryQuery = {
   __typename?: 'Query'
-  status: { __typename?: 'Status'; name: string; state: State; version: string }
+  status: {
+    __typename?: 'Status'
+    name: string
+    environment: string
+    state: State
+    version: string
+  }
 }
 
 export const StatusQueryDocument = gql`
   query statusQuery {
     status {
       name
+      environment
       state
       version
     }

@@ -1,6 +1,7 @@
 query statusQuery {
   status {
     name
+    environment
     state
     version
   }
