@@ -34,6 +34,11 @@ test('frontend has the status page and it shows the frontend and bff status', as
   ).not.toContainText('undef')
   await expect(
     frontendStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
+  await expect(
+    frontendStatusCard
       .locator('dt', { hasText: /^\s*state:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).toHaveText(/^\s*healthy\s*$/)
@@ -70,6 +75,11 @@ test('frontend has the status page and it shows the frontend and bff status', as
   ).not.toContainText('undef')
   await expect(
     bffGqlStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
+  await expect(
+    bffGqlStatusCard
       .locator('dt', { hasText: /^\s*state:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).toHaveText(/^\s*healthy\s*$/)
@@ -99,6 +109,11 @@ test('frontend has the status page and it shows the frontend and bff status', as
       .locator('dt', { hasText: /^\s*name:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).not.toContainText('undef')
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
   await expect(
     bffOpenAPIStatusCard
       .locator('dt', { hasText: /^\s*state:\s*$/ })
