@@ -1,6 +1,8 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql'
 import { ApiProperty } from '@nestjs/swagger'
 
+type PickType<T, K extends keyof T> = T[K]
+type NodeEnv = PickType<NodeJS.ProcessEnv, 'NODE_ENV'>
 const SemVerRegex =
   /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/
 
@@ -20,6 +22,15 @@ export class Status {
     description: 'The service name of BFF',
   })
   name: string
+
+  @ApiProperty({
+    example: 'production',
+    description: 'The service environment of BFF',
+  })
+  @Field({
+    description: 'The service environment of BFF',
+  })
+  environment: NodeEnv
 
   @ApiProperty({
     enum: State,
