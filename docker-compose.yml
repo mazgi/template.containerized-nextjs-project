@@ -202,7 +202,7 @@ services:
         npm run storybook
     depends_on:
       frontend:
-        condition: service_started
+        condition: service_healthy
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
     profiles:
