@@ -9,6 +9,7 @@ import { GraphQLModule } from '@nestjs/graphql'
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      cache: 'bounded',
     }),
     StatusModule,
     // https://docs.nestjs.com/recipes/router-module
