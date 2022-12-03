@@ -68,6 +68,9 @@ services:
         sort-package-json
         /workspace/scripts/wait-redis.bash redis
         /workspace/scripts/wait-mysql.bash mysql
+        npx prisma migrate status || {
+          echo 'The DB migration is needed.'
+        }
         npm run db:migrate:dev
         npm run start:dev
     healthcheck:
