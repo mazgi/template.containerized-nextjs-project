@@ -9,3 +9,9 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model Items {
+  @@map("items")
+  id String @id @db.VarChar(255)
+  text String @db.Text
+}
