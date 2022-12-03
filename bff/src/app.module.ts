@@ -1,3 +1,4 @@
+import { ItemsModule } from './modules/items/items.module'
 import { StatusModule } from './modules/status/status.module'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
@@ -11,12 +12,13 @@ import { GraphQLModule } from '@nestjs/graphql'
       autoSchemaFile: true,
       cache: 'bounded',
     }),
+    ItemsModule,
     StatusModule,
     // https://docs.nestjs.com/recipes/router-module
     RouterModule.register([
       {
         path: 'openapi',
-        children: [StatusModule],
+        children: [ItemsModule, StatusModule],
       },
     ]),
   ],

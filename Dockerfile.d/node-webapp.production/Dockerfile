@@ -69,9 +69,11 @@ RUN : Update pkg version with GIT_SHORT_SHA: ${GIT_SHORT_SHA}\
 RUN : Install deps\
   && npm clean-install\
   && npm run build\
+  && npm run prisma:generate\
   && :
 
 FROM base AS bff-runner
+ENV DATABASE_URL=
 ENV NODE_ENV=production
 ENV PORT=4000
 EXPOSE ${PORT}
@@ -81,6 +83,7 @@ RUN :\
   && npm cache clean --force\
   && :
 COPY --from=bff-builder --chown=node:node /workspace/dist ./dist
+COPY --from=bff-builder --chown=node:node /workspace/node_modules/.prisma ./node_modules/.prisma
 CMD [ "npm", "run", "start:prod" ]
 HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
   CMD curl --fail --output /dev/null --silent "http://localhost:${PORT}/openapi/status"

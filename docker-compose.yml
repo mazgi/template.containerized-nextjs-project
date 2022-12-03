@@ -42,6 +42,8 @@ x-service-bff-base: &bff-base
       condition: service_started
     redis:
       condition: service_started
+  environment:
+    DATABASE_URL: mysql://root@mysql:3306/app_dev
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
@@ -66,18 +68,20 @@ services:
         sort-package-json
         /workspace/scripts/wait-redis.bash redis
         /workspace/scripts/wait-mysql.bash mysql
+        npx prisma migrate status || {
+          echo 'The DB migration is needed.'
+        }
+        npm run db:migrate:dev
         npm run start:dev
     healthcheck:
       test:
-        [
-          'CMD',
-          'curl',
-          '--fail',
-          '--output',
-          '/dev/null',
-          '--silent',
-          'localhost:4000/openapi/status',
-        ]
+        - CMD
+        - curl
+        - --fail
+        - --output
+        - /dev/null
+        - --silent
+        - localhost:4000/openapi/status
       interval: 8s
       timeout: 1s
       retries: 64
@@ -109,6 +113,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-mysql://root@mysql:3306/app_rc}
     image: local.local/${PROJECT_UNIQUE_ID:-no-name}/bff-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:14000:4000
@@ -158,15 +164,13 @@ services:
         npm run dev:debug
     healthcheck:
       test:
-        [
-          'CMD',
-          'curl',
-          '--fail',
-          '--output',
-          '/dev/null',
-          '--silent',
-          'localhost:3000/api/status',
-        ]
+        - CMD
+        - curl
+        - --fail
+        - --output
+        - /dev/null
+        - --silent
+        - localhost:3000/api/status
       interval: 8s
       timeout: 1s
       retries: 64
@@ -198,7 +202,7 @@ services:
         npm run storybook
     depends_on:
       frontend:
-        condition: service_started
+        condition: service_healthy
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:6006:6006
     profiles:
@@ -227,7 +231,12 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
     healthcheck:
-      test: ['CMD', 'mysql', '--host=mysql', '--user=root', '--execute=quit']
+      test:
+        - CMD
+        - mysql
+        - --host=mysql
+        - --user=root
+        - --execute=quit
       interval: 8s
       timeout: 1s
       retries: 8
@@ -254,7 +263,10 @@ services:
     image: redis:6
     init: true
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test:
+        - CMD
+        - redis-cli
+        - ping
       interval: 8s
       timeout: 1s
       retries: 8
