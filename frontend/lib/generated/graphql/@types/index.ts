@@ -16,8 +16,17 @@ export type Scalars = {
   Float: number
 }
 
+export type Item = {
+  __typename?: 'Item'
+  /** The unique ID of the Item */
+  id: Scalars['ID']
+  /** Any text. */
+  text: Scalars['String']
+}
+
 export type Query = {
   __typename?: 'Query'
+  items: Array<Item>
   status: Status
 }
 
