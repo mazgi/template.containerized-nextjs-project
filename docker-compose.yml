@@ -42,6 +42,8 @@ x-service-bff-base: &bff-base
       condition: service_started
     redis:
       condition: service_started
+  environment:
+    DATABASE_URL: mysql://root@mysql:3306/app_dev
   working_dir: /workspace/bff
 
 x-service-frontend-base: &frontend-base
@@ -109,6 +111,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-mysql://root@mysql:3306/app_rc}
     image: local.local/${PROJECT_UNIQUE_ID:-no-name}/bff-prod:HEAD
     ports:
       - ${BIND_IP_ADDR:-127.0.0.1}:14000:4000
