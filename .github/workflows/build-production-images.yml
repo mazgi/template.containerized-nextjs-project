@@ -29,7 +29,7 @@ jobs:
         timeout-minutes: 4
         run: |
           docker compose pull
-      - name: Start Middlewares
+      - name: Start Middlewares in the background
         timeout-minutes: 1
         run: |
           docker compose up --detach mysql redis
@@ -40,7 +40,7 @@ jobs:
         run: |
           docker compose\
            build --build-arg=GIT_SHORT_SHA=${GITHUB_SHA::7}\
-           {bff,frontend}-prod
+           {bff,frontend}-prod e2e-tests
       #
       # To validate production images: (2/4)
       - name: Wait Redis
@@ -51,7 +51,7 @@ jobs:
         timeout-minutes: 1
         run: |
           docker compose run mysql /workspace/scripts/wait-mysql.bash mysql
-      - name: Start services
+      - name: Start services in the background
         timeout-minutes: 4
         run: |
           docker compose up --detach {bff,frontend}-prod e2e-tests
@@ -66,11 +66,20 @@ jobs:
           done
       #
       # To validate production images: (3/4)
+      - name: Show logs - bff-prod
+        timeout-minutes: 1
+        run: |
+          docker compose logs bff-prod
+      - name: Show logs - frontend-prod
+        timeout-minutes: 1
+        run: |
+          docker compose logs frontend-prod
       - name: Wait services
         timeout-minutes: 4
         run: |
           while :
           do
+            docker compose ps {bff,frontend}-prod
             test '["bff-prod","frontend-prod"]' = "$(
               docker compose ps {bff,frontend}-prod --format=json\
                | jq --compact-output '[.[] | select(.Health=="healthy") | .Service] | sort' 2> /dev/null

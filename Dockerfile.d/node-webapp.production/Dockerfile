@@ -83,7 +83,7 @@ RUN :\
 COPY --from=bff-builder --chown=node:node /workspace/dist ./dist
 CMD [ "npm", "run", "start:prod" ]
 HEALTHCHECK --interval=2s --timeout=1s --start-period=10s --retries=2\
-  CMD curl --fail --output /dev/null --silent "http://localhost:${PORT}/rest/status"
+  CMD curl --fail --output /dev/null --silent "http://localhost:${PORT}/openapi/status"
 # ================
 
 # ================
