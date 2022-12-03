@@ -38,6 +38,7 @@ const BFFOpenAPIStatusCard: React.FC = () => {
 const FrontendStatusCard: React.FC = () => {
   const [status, setStatus] = useState<Status>({
     name: 'initial name',
+    environment: 'development',
     state: 'unhealthy',
     version: '0.0.0+initial',
   })

@@ -10,6 +10,7 @@ export default function handler(
 ) {
   res.status(200).json({
     name: publicRuntimeConfig.PACKAGE_NAME,
+    environment: process.env.NODE_ENV,
     state: 'healthy',
     version: publicRuntimeConfig.PACKAGE_VERSION,
   })

@@ -27,6 +27,8 @@ const Component: React.FC<Props> = (props) => {
       <dl>
         <dt>name:</dt>
         <dd>{data.name}</dd>
+        <dt>env:</dt>
+        <dd>{data.environment}</dd>
         <dt>state:</dt>
         <dd>{data.state}</dd>
         <dt>version:</dt>
