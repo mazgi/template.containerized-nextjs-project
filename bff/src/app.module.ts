@@ -1,15 +1,21 @@
+import { StatusModule } from './modules/status/status.module'
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { RouterModule } from '@nestjs/core'
-import { StatusModule as RESTStatusModule } from '~/src/rest/status/status.module'
+import { GraphQLModule } from '@nestjs/graphql'
 
 @Module({
   imports: [
-    RESTStatusModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: true,
+    }),
+    StatusModule,
     // https://docs.nestjs.com/recipes/router-module
     RouterModule.register([
       {
-        path: 'rest',
-        children: [RESTStatusModule],
+        path: 'openapi',
+        children: [StatusModule],
       },
     ]),
   ],

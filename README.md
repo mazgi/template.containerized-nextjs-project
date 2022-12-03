@@ -88,6 +88,8 @@ Now you can access your services at the following ports.
 
 - Frontend: `http://${PUBLIC_IP_ADDR_OR_FQDN}:3000`
 - BFF: `http://${PUBLIC_IP_ADDR_OR_FQDN}:4000`
+  - GraphQL Playground: `http://${PUBLIC_IP_ADDR_OR_FQDN}:4000/graphql`
+  - OpenAPI Web UI: `http://${PUBLIC_IP_ADDR_OR_FQDN}:4000/swagger`
 - Storybook: `http://${PUBLIC_IP_ADDR_OR_FQDN}:6006`
 
 <details>

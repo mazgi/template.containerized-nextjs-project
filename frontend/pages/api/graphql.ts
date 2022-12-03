@@ -17,7 +17,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     req.url = dest
     proxy.once('proxyRes', resolve).once('error', reject).web(req, res, {
       changeOrigin: true,
-      target: process.env.FRONTEND_BFF_ENDPOINT_REST,
+      target: process.env.FRONTEND_BFF_ENDPOINT_GRAPHQL_HTTP,
     })
   })
 }

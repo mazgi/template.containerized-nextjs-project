@@ -1,52 +1,47 @@
 import aspida from '@aspida/fetch'
 import useAspidaSWR from '@aspida/swr'
+import { GraphQLClient } from 'graphql-request'
 import { NextPage } from 'next'
 import Head from 'next/head'
-import { Fragment, useEffect, useState } from 'react'
-import api from '~/lib/client/rest/$api'
-import { Status } from '~/pages/api/status'
+import { useEffect, useState } from 'react'
+import { StatusCard } from '~/components/organisms/status-card'
+import { getSdkWithHooks } from '~/lib/generated/graphql/sdk'
+import api from '~/lib/generated/openapi/$api'
+import { Status } from '~/lib/generated/openapi/@types'
 import styles from '~/styles/Status.module.css'
 
-const BFFStatus: React.FC = () => {
+const BFFGraphQLStatusCard: React.FC = () => {
+  const client = new GraphQLClient('/api/graphql')
+  const sdk = getSdkWithHooks(client)
+  const { data, error } = sdk.useStatusQuery('status')
+  return (
+    <StatusCard
+      title="BFF (GraphQL)"
+      data={data?.status}
+      error={error}
+    ></StatusCard>
+  )
+}
+
+const BFFOpenAPIStatusCard: React.FC = () => {
   const client = api(
     aspida(fetch, {
       baseURL: '/api',
     })
   )
-  const { data, error } = useAspidaSWR(client.rest.status)
-  if (error)
-    return (
-      <Fragment>
-        <p>Failed to load</p>
-      </Fragment>
-    )
-  if (!data)
-    return (
-      <Fragment>
-        <p>Loading...</p>
-      </Fragment>
-    )
+  const { data, error } = useAspidaSWR(client.openapi.status)
   return (
-    <Fragment>
-      <dl>
-        <dt>name:</dt>
-        <dd>{data.name}</dd>
-        <dt>state:</dt>
-        <dd>{data.state}</dd>
-        <dt>version:</dt>
-        <dd>{data.version}</dd>
-      </dl>
-    </Fragment>
+    <StatusCard title="BFF (OpenAPI)" data={data} error={error}></StatusCard>
   )
 }
 
-const Page: NextPage = () => {
+const FrontendStatusCard: React.FC = () => {
   const [status, setStatus] = useState<Status>({
     name: 'initial name',
-    state: 'initial state',
+    environment: 'development',
+    state: 'unhealthy',
     version: '0.0.0+initial',
   })
-
   useEffect(() => {
     const fetchStatus = async () => {
       const res = await fetch('/api/status')
@@ -55,7 +50,10 @@ const Page: NextPage = () => {
     }
     fetchStatus()
   }, [])
+  return <StatusCard title="Frontend" data={status}></StatusCard>
+}
 
+const Page: NextPage = () => {
   return (
     <div>
       <Head>
@@ -64,25 +62,12 @@ const Page: NextPage = () => {
       <main className={styles.main}>
         <h1>Status</h1>
         <div className={styles.grid}>
-          <div className={styles.card}>
-            <h2>Frontend Status</h2>
-            <dl>
-              <dt>name:</dt>
-              <dd>{status.name}</dd>
-              <dt>state:</dt>
-              <dd>{status.state}</dd>
-              <dt>version:</dt>
-              <dd>{status.version}</dd>
-            </dl>
-          </div>
-          <div className={styles.card}>
-            <h2>BFF Status</h2>
-            <BFFStatus></BFFStatus>
-          </div>
+          <FrontendStatusCard></FrontendStatusCard>
+          <BFFGraphQLStatusCard></BFFGraphQLStatusCard>
+          <BFFOpenAPIStatusCard></BFFOpenAPIStatusCard>
         </div>
       </main>
     </div>
   )
 }
-
 export default Page

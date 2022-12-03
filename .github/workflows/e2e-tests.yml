@@ -75,6 +75,14 @@ jobs:
           docker compose logs frontend
       #
       # Test services
+      - name: It should successfully generate Web API clients in the frontend
+        timeout-minutes: 2
+        run: |
+          docker compose exec frontend npm run generate:clients
+      - name: It should be no change in the clients
+        timeout-minutes: 1
+        run: |
+          git diff --exit-code frontend/lib/generated
       - name: Lint the service
         timeout-minutes: 1
         run: |

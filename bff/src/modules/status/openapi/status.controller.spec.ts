@@ -1,6 +1,6 @@
-import { Status } from './entities/status.entity'
+import { Status } from '../entities/status.entity'
+import { StatusService } from '../status.service'
 import { StatusController } from './status.controller'
-import { StatusService } from './status.service'
 import { Test, TestingModule } from '@nestjs/testing'
 
 describe('StatusController', () => {
@@ -24,10 +24,12 @@ describe('StatusController', () => {
   describe('read', () => {
     it('should return the version', async () => {
       const name = process.env.npm_package_name || 'bff+undef-test'
+      const environment = process.env.NODE_ENV || 'undef'
       const state = 'healthy'
       const version = process.env.npm_package_version || '0.0.0+undef-test'
       const resBody: Status = {
         name,
+        environment,
         state,
         version,
       }

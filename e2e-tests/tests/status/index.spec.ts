@@ -18,7 +18,7 @@ test('frontend has the status page and it shows the frontend and bff status', as
   // Frontend Status
   // https://playwright.dev/docs/selectors#parent-selector
   const frontendStatusCard = page
-    .locator('h2', { hasText: /^\s*Frontend Status\s*$/ })
+    .locator('h2', { hasText: /^\s*Frontend\s*$/ })
     .locator('..')
   await expect(frontendStatusCard).not.toBeNull
   await expect(
@@ -32,6 +32,11 @@ test('frontend has the status page and it shows the frontend and bff status', as
       .locator('dt', { hasText: /^\s*name:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).not.toContainText('undef')
+  await expect(
+    frontendStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
   await expect(
     frontendStatusCard
       .locator('dt', { hasText: /^\s*state:\s*$/ })
@@ -48,38 +53,79 @@ test('frontend has the status page and it shows the frontend and bff status', as
       .locator('xpath=/following-sibling::dd[1]')
   ).not.toContainText('undef')
 
-  // BFF Status
+  // BFF (GraphQL) Status
   // https://playwright.dev/docs/selectors#intermediate-matches
   // https://github.com/microsoft/playwright/issues/11522#issuecomment-1029392073
   // const bffStatusCard = page.locator(
-  //   'main >> div >> *div >> h2:has-text("BFF Status")'
+  //   'main >> div >> *div >> h2:has-text("BFF")'
   // )
-  const bffStatusCard = page
-    .locator('h2', { hasText: /^\s*BFF Status\s*$/ })
+  const bffGqlStatusCard = page
+    .locator('h2', { hasText: /^\s*BFF \(GraphQL\)\s*$/ })
     .locator('..')
-  await expect(bffStatusCard).not.toBeNull
+  await expect(bffGqlStatusCard).not.toBeNull
   await expect(
-    bffStatusCard
+    bffGqlStatusCard
       .locator('dt', { hasText: /^\s*name:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).toHaveText(/^\s*bff\s*$/)
   await expect(
-    bffStatusCard
+    bffGqlStatusCard
       .locator('dt', { hasText: /^\s*name:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).not.toContainText('undef')
   await expect(
-    bffStatusCard
+    bffGqlStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
+  await expect(
+    bffGqlStatusCard
       .locator('dt', { hasText: /^\s*state:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).toHaveText(/^\s*healthy\s*$/)
   await expect(
-    bffStatusCard
+    bffGqlStatusCard
       .locator('dt', { hasText: /^\s*version:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).toHaveText(SemVerRegex)
   await expect(
-    bffStatusCard
+    bffGqlStatusCard
+      .locator('dt', { hasText: /^\s*version:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).not.toContainText('undef')
+
+  // BFF (OpenAPI) Status
+  const bffOpenAPIStatusCard = page
+    .locator('h2', { hasText: /^\s*BFF \(OpenAPI\)\s*$/ })
+    .locator('..')
+  await expect(bffOpenAPIStatusCard).not.toBeNull
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*name:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(/^\s*bff\s*$/)
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*name:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).not.toContainText('undef')
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*env:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(new RegExp(`^\\s*${process.env.E2E_TARGET_NODE_ENV}\\s*$`))
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*state:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(/^\s*healthy\s*$/)
+  await expect(
+    bffOpenAPIStatusCard
+      .locator('dt', { hasText: /^\s*version:\s*$/ })
+      .locator('xpath=/following-sibling::dd[1]')
+  ).toHaveText(SemVerRegex)
+  await expect(
+    bffOpenAPIStatusCard
       .locator('dt', { hasText: /^\s*version:\s*$/ })
       .locator('xpath=/following-sibling::dd[1]')
   ).not.toContainText('undef')
