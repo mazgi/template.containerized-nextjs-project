@@ -16,6 +16,11 @@ jobs:
       - uses: actions/checkout@v3
       #
       # Cache settings
+      - name: cache the docker images
+        uses: actions/cache@v3
+        with:
+          path: tmp/docker-images
+          key: ${{ github.workflow }}-tmp-docker-images-${{ hashFiles('Dockerfile.d/**') }}
       - name: cache the pnpm store
         uses: actions/cache@v3
         with:
@@ -50,11 +55,22 @@ jobs:
       # Envirinment settings
       - name: Export UIDs as environment variables
         run: |
-          echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
           echo "GID=$(id -g)" >> .env
           echo "UID=$(id -u)" >> .env
       #
       # Prepare services
+      - name: Load the docker image if it exists
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all config --format=json\
+           | jq --compact-output --raw-output '[.services[] | select((.image != null) and (.image | startswith("local.local"))) | .image] | sort | unique | .[]'\
+           | sed -e 's!^local.local/no-name/\([[:alnum:]-]\+\):HEAD$!\1!'\
+           | xargs -I '{srv}' --max-procs=0 --verbose\
+           bash -lc '
+          \test -f tmp/docker-images/{srv}\
+           && docker load --input tmp/docker-images/{srv}\
+           || echo "{srv} not exists"\
+          '
       - name: Pull containers
         timeout-minutes: 4
         run: |
@@ -83,6 +99,9 @@ jobs:
       - name: Show logs - bff
         run: |
           docker compose logs bff
+      - name: Show logs - e2e-tests
+        run: |
+          docker compose logs e2e-tests
       - name: Show logs - frontend
         run: |
           docker compose logs frontend
