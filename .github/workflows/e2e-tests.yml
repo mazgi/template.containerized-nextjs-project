@@ -88,10 +88,6 @@ jobs:
            | sed -e 's!^local.local/no-name/!!'\
            | xargs -I '{img}' --max-procs=0 --verbose\
            docker save --output 'tmp/docker-images/{img}' 'local.local/no-name/{img}:HEAD'
-      - name: (debug) List saved images
-        timeout-minutes: 8
-        run: |
-          ls -al tmp/docker-images/
       - name: Start services
         timeout-minutes: 4
         run: |

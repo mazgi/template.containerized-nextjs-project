@@ -21,6 +21,11 @@ jobs:
       - uses: actions/checkout@v3
       #
       # Cache settings
+      - name: cache the docker images
+        uses: actions/cache@v3
+        with:
+          path: tmp/docker-images
+          key: ${{ github.workflow }}-tmp-docker-images-${{ hashFiles('Dockerfile.d/**') }}
       - name: cache the pnpm store
         uses: actions/cache@v3
         with:
@@ -50,6 +55,18 @@ jobs:
           echo "UID=$(id -u)" >> .env
       #
       # Prepare services
+      - name: Load the docker image if it exists
+        timeout-minutes: 4
+        run: |
+          docker compose --profile=dev-all config --format=json\
+           | jq --compact-output --raw-output '[.services[] | select((.image != null) and (.image | startswith("local.local"))) | .image] | sort | unique | .[]'\
+           | sed -e 's!^local.local/no-name/\([[:alnum:]-]\+\):HEAD$!\1!'\
+           | xargs -I '{srv}' --max-procs=0 --verbose\
+           bash -lc '
+          \test -f tmp/docker-images/{srv}\
+           && docker load --input tmp/docker-images/{srv}\
+           || echo "{srv} not exists"\
+          '
       - name: Pull containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
@@ -58,14 +75,37 @@ jobs:
         timeout-minutes: 4
         run: |
           docker compose build ${{ matrix.service }}
+      - name: Save the docker image
+        timeout-minutes: 4
+        run: |
+          docker images\
+           --filter=reference='local.local/no-name/*-dev'\
+           --format='{{.Repository}}'\
+           | sed -e 's!^local.local/no-name/!!'\
+           | xargs -I '{img}' --max-procs=0 --verbose\
+           docker save --output 'tmp/docker-images/{img}' 'local.local/no-name/{img}:HEAD'
       - name: Start the service - ${{ matrix.service }}
         timeout-minutes: 2
         run: |
           docker compose up --wait ${{ matrix.service }}
-      - name: Show logs - ${{ matrix.service }}
-        timeout-minutes: 1
+      - name: Wait the service - ${{ matrix.service }}
+        timeout-minutes: 4
         run: |
+          while :
+          do
+            docker compose ps --format=json ${{ matrix.service }}\
+             | jq --exit-status '.[] | select(.Health=="healthy")' 2> /dev/null\
+             && break
+            sleep 1
+          done
           docker compose logs ${{ matrix.service }}
+      - name: Show logs - bff
+        run: |
+          docker compose logs bff
+      - name: Show logs - frontend
+        run: |
+          docker compose logs frontend
+
       #
       # Test services
       - name: Test the service - ${{ matrix.service }}
