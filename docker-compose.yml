@@ -125,10 +125,8 @@ services:
   e2e-tests:
     <<: *node-webapp-development-base
     build:
-      args:
-        GID: ${GID:-0}
-        UID: ${UID:-0}
-      context: Dockerfile.d/e2e-tests
+      <<: *node-webapp-development-base-build
+      target: e2e-tests
     command:
       - zsh
       - --login
