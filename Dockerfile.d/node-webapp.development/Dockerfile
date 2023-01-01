@@ -1,10 +1,8 @@
 # https://github.com/mazgi/dockerfiles/blob/main/Dockerfile.d/node-webapp.development/customize-example.Dockerfile
-FROM ghcr.io/mazgi/node-webapp.development
+FROM ghcr.io/mazgi/node-webapp.development AS default
 
 ARG GID=0
 ARG UID=0
-ENV GID=${GID:-0}
-ENV UID=${UID:-0}
 ENV NODE_ENV=development
 
 RUN :\
@@ -15,3 +13,22 @@ RUN :\
   && echo '%users ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/grant-all-without-password-to-users\
   && echo '%developer ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/grant-all-without-password-to-developer\
   && :
+
+FROM default AS e2e-tests
+
+ARG PLAYWRIGHT_BROWSERS_PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/cache/ms-playwright}
+ENV NODE_ENV=development
+
+RUN :\
+  && npx playwright install-deps\
+  # Create browser cache dir and set the owner
+  # See also https://playwright.dev/docs/browsers#managing-browser-binaries
+  && mkdir -p ${PLAYWRIGHT_BROWSERS_PATH}\
+  && chown -R developer:users ${PLAYWRIGHT_BROWSERS_PATH}\
+  && :
+USER developer
+RUN :\
+  && npx playwright install\
+  && :
+USER root

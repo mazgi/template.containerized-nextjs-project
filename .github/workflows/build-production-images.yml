@@ -24,6 +24,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       #
+      # Envirinment settings
+      - name: Export UIDs as environment variables
+        run: |
+          echo "GID=$(id -g)" >> .env
+          echo "UID=$(id -u)" >> .env
+      #
       # To validate production images: (1/4)
       - name: Pull images
         timeout-minutes: 4
@@ -62,7 +68,7 @@ jobs:
         run: |
           for service in bff frontend
           do
-            docker save --output tmp/docker-image-${service} local.local/no-name/${service}-prod:HEAD
+            docker save --output tmp/docker-images/${service}-prod local.local/no-name/${service}-prod:HEAD
           done
       #
       # To validate production images: (3/4)
@@ -126,7 +132,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: docker-images
-          path: tmp/docker-image-*
+          path: tmp/docker-images/*
           retention-days: 1
 
   publish-docker-images:
@@ -153,23 +159,20 @@ jobs:
       - name: Load the docker image - ${{ matrix.service }}
         timeout-minutes: 1
         run: |
-          docker load --input tmp/docker-image-${{ matrix.service }}
+          docker load --input tmp/docker-images/${{ matrix.service }}-prod
       - name: (Test)list docker images
         run: |
           docker images
       #
       # Generate the tag
-      - name: Store the short SHA hash
-        run: |
-          echo SHORT_SHA=$(echo '${{ toJSON(github) }}' | jq -r '.sha[0:7]') >> $GITHUB_ENV
       - name: Generate the docker tag suffix using the git tag
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo TAG_SUFFIX="${GITHUB_REF#refs/*/}-${SHORT_SHA}" >> $GITHUB_ENV
+          echo TAG_SUFFIX="${GITHUB_REF#refs/*/}-${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Generate the docker tag suffix using the current date
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: |
-          echo TAG_SUFFIX="$(date +%Y%m-)${SHORT_SHA}" >> $GITHUB_ENV
+          echo TAG_SUFFIX="$(date +%Y%m-)${GITHUB_SHA::7}" >> $GITHUB_ENV
       #
       # Tag the image to the registry - ghcr.io
       - name: Generate tag prefix for ghcr.io
@@ -180,10 +183,9 @@ jobs:
         if: ${{ matrix.platform == 'ghcr.io' }}
         run: |
           echo ${{ secrets.TOKEN_TO_PUSH_GHCR }} | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
-
+      #
       # Push the image to the registry
       - name: Push the image - ${{ matrix.service }}, ${{ matrix.platform }}
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           docker tag local.local/no-name/${{ matrix.service }}-prod:HEAD ${TAG_PREFIX}:${TAG_SUFFIX}
           docker push ${TAG_PREFIX}:${TAG_SUFFIX}
