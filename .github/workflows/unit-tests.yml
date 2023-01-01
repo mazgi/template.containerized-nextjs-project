@@ -50,23 +50,25 @@ jobs:
       # Envirinment settings
       - name: Export UIDs as environment variables
         run: |
-          echo "DOCKER_GID=$(getent group docker | cut -d : -f 3)" >> .env
-          echo "GID=$(id -g)" >> .env
-          echo "UID=$(id -u)" >> .env
+          echo "GID=$(id -g)" >> $GITHUB_ENV
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build the docker image - default
+        timeout-minutes: 4
+        uses: docker/build-push-action@v3
+        with:
+          build-args: |
+            GID=${{ env.GID }}
+            UID=${{ env.UID }}
+          cache-from: |
+            type=gha
+          cache-to: |
+            type=gha,mode=max
+          context: Dockerfile.d/node-webapp.development
+          target: default
       #
       # Prepare services
-      - name: Load the docker image if it exists
-        timeout-minutes: 4
-        run: |
-          docker compose --profile=dev-all config --format=json\
-           | jq --compact-output --raw-output '[.services[] | select((.image != null) and (.image | startswith("local.local"))) | .image] | sort | unique | .[]'\
-           | sed -e 's!^local.local/no-name/\([[:alnum:]-]\+\):HEAD$!\1!'\
-           | xargs -I '{srv}' --max-procs=0 --verbose\
-           bash -lc '
-          \test -f tmp/docker-images/{srv}\
-           && docker load --input tmp/docker-images/{srv}\
-           || echo "{srv} not exists"\
-          '
       - name: Pull containers - ${{ matrix.service }}
         timeout-minutes: 4
         run: |
@@ -75,15 +77,10 @@ jobs:
         timeout-minutes: 4
         run: |
           docker compose build ${{ matrix.service }}
-      - name: Save the docker image
-        timeout-minutes: 4
+      - name: (debug) List images
+        timeout-minutes: 8
         run: |
-          docker images\
-           --filter=reference='local.local/no-name/*-dev'\
-           --format='{{.Repository}}'\
-           | sed -e 's!^local.local/no-name/!!'\
-           | xargs -I '{img}' --max-procs=0 --verbose\
-           docker save --output 'tmp/docker-images/{img}' 'local.local/no-name/{img}:HEAD'
+          docker images
       - name: Start the service - ${{ matrix.service }}
         timeout-minutes: 2
         run: |
