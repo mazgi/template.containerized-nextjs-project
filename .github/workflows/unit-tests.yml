@@ -21,11 +21,6 @@ jobs:
       - uses: actions/checkout@v3
       #
       # Cache settings
-      - name: cache the docker images
-        uses: actions/cache@v3
-        with:
-          path: tmp/docker-images
-          key: ${{ github.workflow }}-tmp-docker-images-${{ hashFiles('Dockerfile.d/**') }}
       - name: cache the pnpm store
         uses: actions/cache@v3
         with:
