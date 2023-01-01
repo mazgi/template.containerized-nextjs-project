@@ -28,7 +28,9 @@ x-service-node-webapp-development-base: &node-webapp-development-base
       npm audit fix
       sort-package-json
       sleep infinity
+  image: local.local/${PROJECT_UNIQUE_ID:-no-name}/default-dev:HEAD
   init: true
+  pull_policy: never
   user: ${UID:-0}:${GID:-0}
   volumes:
     - home-developer:/home/developer
@@ -127,21 +129,11 @@ services:
     build:
       <<: *node-webapp-development-base-build
       target: e2e-tests
-    command:
-      - zsh
-      - --login
-      - -c
-      - |
-        npm-check-updates --upgrade
-        npm install
-        npm audit fix
-        sort-package-json
-        npx playwright install
-        sleep infinity
     environment:
       BFF_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
       E2E_TARGET_NODE_ENV: development
       FRONTEND_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-frontend}:3000
+    image: local.local/${PROJECT_UNIQUE_ID:-no-name}/e2e-tests-dev:HEAD
     ports:
       # https://github.com/microsoft/playwright/pull/18517
       - ${BIND_IP_ADDR:-127.0.0.1}:9323:9323
