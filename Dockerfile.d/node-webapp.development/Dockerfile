@@ -16,8 +16,19 @@ RUN :\
 
 FROM default AS e2e-tests
 
+ARG PLAYWRIGHT_BROWSERS_PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/cache/ms-playwright}
 ENV NODE_ENV=development
 
 RUN :\
   && npx playwright install-deps\
+  # Create browser cache dir and set the owner
+  # See also https://playwright.dev/docs/browsers#managing-browser-binaries
+  && mkdir -p ${PLAYWRIGHT_BROWSERS_PATH}\
+  && chown -R developer:users ${PLAYWRIGHT_BROWSERS_PATH}\
   && :
+USER developer
+RUN :\
+  && npx playwright install\
+  && :
+USER root

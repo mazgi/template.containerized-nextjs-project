@@ -12,7 +12,7 @@ x-service-node-webapp-production-base: &node-webapp-production-base
   pull_policy: never
 
 x-service-node-webapp-development-base: &node-webapp-development-base
-  build:
+  build: &node-webapp-development-base-build
     args:
       GID: ${GID:-0}
       UID: ${UID:-0}
