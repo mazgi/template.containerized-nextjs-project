@@ -14,13 +14,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      #
-      # Cache settings
-      - name: cache the docker images
-        uses: actions/cache@v3
-        with:
-          path: tmp/docker-images
-          key: ${{ github.workflow }}-tmp-docker-images-${{ hashFiles('Dockerfile.d/**') }}
       - name: cache the pnpm store
         uses: actions/cache@v3
         with:
@@ -55,22 +48,38 @@ jobs:
       # Envirinment settings
       - name: Export UIDs as environment variables
         run: |
-          echo "GID=$(id -g)" >> .env
-          echo "UID=$(id -u)" >> .env
+          echo "GID=$(id -g)" >> $GITHUB_ENV
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build the docker image - default
+        timeout-minutes: 4
+        uses: docker/build-push-action@v3
+        with:
+          build-args: |
+            GID=${{ env.GID }}
+            UID=${{ env.UID }}
+          cache-from: |
+            type=gha
+          cache-to: |
+            type=gha,mode=max
+          context: Dockerfile.d/node-webapp.development
+          target: default
+      - name: Build the docker image - e2e-tests
+        timeout-minutes: 4
+        uses: docker/build-push-action@v3
+        with:
+          build-args: |
+            GID=${{ env.GID }}
+            UID=${{ env.UID }}
+          cache-from: |
+            type=gha
+          cache-to: |
+            type=gha,mode=max
+          context: Dockerfile.d/node-webapp.development
+          target: e2e-tests
       #
       # Prepare services
-      - name: Load the docker image if it exists
-        timeout-minutes: 4
-        run: |
-          docker compose --profile=dev-all config --format=json\
-           | jq --compact-output --raw-output '[.services[] | select((.image != null) and (.image | startswith("local.local"))) | .image] | sort | unique | .[]'\
-           | sed -e 's!^local.local/no-name/\([[:alnum:]-]\+\):HEAD$!\1!'\
-           | xargs -I '{srv}' --max-procs=0 --verbose\
-           bash -lc '
-          \test -f tmp/docker-images/{srv}\
-           && docker load --input tmp/docker-images/{srv}\
-           || echo "{srv} not exists"\
-          '
       - name: Pull containers
         timeout-minutes: 4
         run: |
@@ -79,15 +88,6 @@ jobs:
         timeout-minutes: 8
         run: |
           docker compose build bff e2e-tests frontend
-      - name: Save the docker image
-        timeout-minutes: 4
-        run: |
-          docker images\
-           --filter=reference='local.local/no-name/*-dev'\
-           --format='{{.Repository}}'\
-           | sed -e 's!^local.local/no-name/!!'\
-           | xargs -I '{img}' --max-procs=0 --verbose\
-           docker save --output 'tmp/docker-images/{img}' 'local.local/no-name/{img}:HEAD'
       - name: Start services
         timeout-minutes: 4
         run: |
