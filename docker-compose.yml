@@ -17,6 +17,7 @@ x-service-node-webapp-development-base: &node-webapp-development-base
       GID: ${GID:-0}
       UID: ${UID:-0}
     context: Dockerfile.d/node-webapp.development
+    target: default
   command:
     - zsh
     - --login
