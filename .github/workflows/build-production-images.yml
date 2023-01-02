@@ -155,7 +155,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: docker-images
-          path: tmp/
+          path: tmp/docker-images/
       - name: Load the docker image - ${{ matrix.service }}
         timeout-minutes: 1
         run: |
