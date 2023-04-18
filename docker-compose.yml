@@ -129,6 +129,17 @@ services:
     build:
       <<: *node-webapp-development-base-build
       target: e2e-tests
+    command:
+      - zsh
+      - --login
+      - -c
+      - |
+        npm-check-updates --upgrade
+        npm install
+        npm audit fix
+        npm run playwright:install
+        sort-package-json
+        sleep infinity
     environment:
       BFF_URL: http://${PUBLIC_IP_ADDR_OR_FQDN:-bff}:4000
       E2E_TARGET_NODE_ENV: development
