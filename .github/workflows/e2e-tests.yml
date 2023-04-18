@@ -91,7 +91,7 @@ jobs:
         run: |
           docker compose build bff e2e-tests frontend
       - name: Start services
-        timeout-minutes: 4
+        timeout-minutes: 8
         run: |
           docker compose up --wait bff e2e-tests frontend
       - name: Show logs - bff
