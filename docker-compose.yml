@@ -148,7 +148,7 @@ services:
       - --login
       - -c
       - |
-        npm-check-updates --upgrade \!openapi2aspida
+        npm-check-updates --upgrade --reject graphql-codegen-plugin-typescript-swr,openapi2aspida
         npm install
         npm audit fix
         sort-package-json
