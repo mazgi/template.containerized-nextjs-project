@@ -12,10 +12,12 @@ export type InputMaybe<T> = Maybe<T>
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K]
 }
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]?: Maybe<T[SubKey]> }
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
-  { [SubKey in K]: Maybe<T[SubKey]> }
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>
+}
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>
+}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string
@@ -56,6 +58,13 @@ export type Status = {
   version: Scalars['String']
 }
 
+export type ItemsQueryQueryVariables = Exact<{ [key: string]: never }>
+
+export type ItemsQueryQuery = {
+  __typename?: 'Query'
+  items: Array<{ __typename?: 'Item'; id: string; text: string }>
+}
+
 export type StatusQueryQueryVariables = Exact<{ [key: string]: never }>
 
 export type StatusQueryQuery = {
@@ -69,6 +78,14 @@ export type StatusQueryQuery = {
   }
 }
 
+export const ItemsQueryDocument = gql`
+  query itemsQuery {
+    items {
+      id
+      text
+    }
+  }
+`
 export const StatusQueryDocument = gql`
   query statusQuery {
     status {
@@ -97,6 +114,20 @@ export function getSdk(
   withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
+    itemsQuery(
+      variables?: ItemsQueryQueryVariables,
+      requestHeaders?: Dom.RequestInit['headers']
+    ): Promise<ItemsQueryQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ItemsQueryQuery>(ItemsQueryDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        'itemsQuery',
+        'query'
+      )
+    },
     statusQuery(
       variables?: StatusQueryQueryVariables,
       requestHeaders?: Dom.RequestInit['headers']
@@ -121,6 +152,17 @@ export function getSdkWithHooks(
   const sdk = getSdk(client, withWrapper)
   return {
     ...sdk,
+    useItemsQuery(
+      key: SWRKeyInterface,
+      variables?: ItemsQueryQueryVariables,
+      config?: SWRConfigInterface<ItemsQueryQuery, ClientError>
+    ) {
+      return useSWR<ItemsQueryQuery, ClientError>(
+        key,
+        () => sdk.itemsQuery(variables),
+        config
+      )
+    },
     useStatusQuery(
       key: SWRKeyInterface,
       variables?: StatusQueryQueryVariables,
