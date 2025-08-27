@@ -285,7 +285,6 @@ services:
   workspace:
     <<: *node-webapp-development-base
 
-version: '3.9'
 volumes:
   home-developer:
     driver: local
